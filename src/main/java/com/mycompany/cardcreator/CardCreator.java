@@ -1,16 +1,16 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
-
 package com.mycompany.cardcreator;
 
-/**
- *
- * @author jas
- */
+import com.mycompany.cardcreator.Modules.ProjectOpener;
+import javax.swing.SwingUtilities;
+
 public class CardCreator {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new ProjectOpener(); // run the module that allows user to open a project
+            }
+        });
     }
 }
