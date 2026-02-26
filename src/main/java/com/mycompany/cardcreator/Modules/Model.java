@@ -15,6 +15,49 @@ public class Model {
     }
 
     private File projectFolder = null;
+    
+    private int canvasWidth = 670;
+    private int canvasHeight = 1067;
+    private String backgroundImagePath = null; // Absolute path to the imported image file
+
+    // Image position and size on the canvas (persisted via Save)
+    private int imgX = 0;
+    private int imgY = 0;
+    private int imgW = 0;
+    private int imgH = 0;
+
+    public String getBackgroundImagePath() 
+    { 
+        return backgroundImagePath;
+    }
+    public void setBackgroundImagePath(String path) {
+        backgroundImagePath = path;
+    }
+
+    public int getImgX() {
+        return imgX;
+    }
+    public void setImgX(int x) {
+        imgX = x;
+    }
+    public int getImgY() {
+        return imgY;
+    }
+    public void setImgY(int y) {
+        imgY = y;
+    }
+    public int getImgW() {
+        return imgW;
+    }
+    public void setImgW(int w) {
+        imgW = w;
+    }
+    public int getImgH() {
+        return imgH;
+    }
+    public void setImgH(int h) {
+        imgH = h;
+    }
 
     private LinkedHashMap<UUID, CardElement> cardElements = new LinkedHashMap<>();
 
@@ -48,6 +91,21 @@ public class Model {
 
     public File getFolder() {
         return projectFolder;
+    }
+    
+    
+    public int getCanvasWidth() 
+    { 
+        return canvasWidth; 
+    }
+    public void setCanvasWidth(int w) {
+        canvasWidth = w;
+    }
+    public int getCanvasHeight() { 
+        return canvasHeight;
+    }
+    public void setCanvasHeight(int h) { 
+        canvasHeight = h;
     }
 
 }
