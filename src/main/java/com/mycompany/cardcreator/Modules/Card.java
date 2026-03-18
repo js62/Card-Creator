@@ -8,4 +8,7 @@ import java.util.UUID;
 
 class Card {
     private List<UUID> elements;//List of this card's elements
+    public List<UUID> getElementIDs(){
+        return elements;
+    }
 }

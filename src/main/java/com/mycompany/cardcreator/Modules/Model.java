@@ -1,8 +1,7 @@
 package com.mycompany.cardcreator.Modules;
 
-import java.util.List;
+
 import java.io.File;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
@@ -74,6 +73,10 @@ public class Model {
     }
 
     private LinkedHashMap<UUID,Card> cards = new LinkedHashMap<>();
+    
+    public Card getCard(UUID CardID){
+        return cards.get(CardID);
+    }
 
     public UUID addCard() {
         UUID id = UUID.randomUUID();

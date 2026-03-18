@@ -1,38 +1,47 @@
 package com.mycompany.cardcreator.Modules;
 
-import com.mycompany.cardcreator.Modules.Model;
 //import javax.swing.JFrame;
 import javax.swing.*;
 import java.io.File;
 import javax.swing.JOptionPane;
 
 /**
- * Main editor window for a card project.
- * Provides import, save, and export functionality.
+ * Main editor window for a card project. Provides import, save, and export
+ * functionality.
  */
 public class Editor {
+
     private Model model;
     private JFrame frame;
     private CardCanvas canvas;
 
     public Editor(File projectFolder) {
         //create instance of model loaded from file path
-        //run GUI
         model = FileIO.loadModel(projectFolder);
-        if (model == null){
+        if (model == null) {
             JOptionPane.showMessageDialog(null, "Failed to open project");
             return;
         }
+        //run GUI
         OpenWindow();
+        //
     }
-    
-    
-    
-    private  void OpenWindow() {
+
+    private void OpenWindow() {
+
+        /* TODO: this window should use what swing calls a "card layout." This 
+        will allow one screen to be pushed on top of another and popped off 
+        later. The main screen should display all cards (which are clickable).
+        When one is clicked, a new screen (Jpanel) should be pushed on top of
+        the main screen. This panel will contain the card canvas and edit 
+        options for this card.
+        
+        The Jpanel that is pushed should be coded in the CardEditor file.
+         */
         frame = new JFrame("Card Editor: " + model.getFolder().getName());
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
+
         JMenuBar menuBar = new JMenuBar();
         JMenu fileMenu = new JMenu("File");
         // Import — opens file chooser to load an image onto the canvas
@@ -40,7 +49,7 @@ public class Editor {
         importItem.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
-                "Images", "png", "jpg", "jpeg", "bmp", "gif"));
+                    "Images", "png", "jpg", "jpeg", "bmp", "gif"));
             if (chooser.showOpenDialog(frame) == JFileChooser.APPROVE_OPTION) {
                 try {
                     java.awt.image.BufferedImage img = javax.imageio.ImageIO.read(chooser.getSelectedFile());
@@ -56,11 +65,7 @@ public class Editor {
                 }
             }
         });
-        
-        
-        
-        
-       
+
         // Save — writes image position/size and all model data to data.json
         JMenuItem saveItem = new JMenuItem("Save");
         saveItem.addActionListener(e -> {
@@ -78,7 +83,7 @@ public class Editor {
             JFileChooser chooser = new JFileChooser(model.getFolder());
             chooser.setSelectedFile(new java.io.File(model.getFolder(), "card_export.png"));
             chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
-                "PNG Image", "png"));
+                    "PNG Image", "png"));
             if (chooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION) {
                 try {
                     java.awt.image.BufferedImage exportImg = canvas.exportAsImage();
@@ -93,13 +98,13 @@ public class Editor {
                 }
             }
         });
-        
+
         fileMenu.add(saveItem);
         fileMenu.add(importItem);
         fileMenu.add(exportItem);
         menuBar.add(fileMenu);
         frame.setJMenuBar(menuBar);
-        
+
         canvas = new CardCanvas(model.getCanvasWidth(), model.getCanvasHeight());
         frame.add(canvas, java.awt.BorderLayout.CENTER);
 
