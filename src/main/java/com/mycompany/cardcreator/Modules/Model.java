@@ -2,6 +2,7 @@ package com.mycompany.cardcreator.Modules;
 
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
@@ -76,6 +77,10 @@ public class Model {
     
     public Card getCard(UUID CardID){
         return cards.get(CardID);
+    }
+    
+    public ArrayList<UUID> getCardIDs(){
+        return new ArrayList<>(cards.keySet());
     }
 
     public UUID addCard() {
