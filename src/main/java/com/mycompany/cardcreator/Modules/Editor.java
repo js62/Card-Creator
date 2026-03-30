@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import javax.swing.*;
 import java.io.File;
+import java.util.UUID;
 import javax.swing.JOptionPane;
 
 /**
@@ -52,19 +53,7 @@ public class Editor {
 
         cardButtons.setLayout(new GridLayout(0, 3, 20, 20));
 
-        // +20 is just to see layout while testing when there aren't any cards yet
-        for (int i = 0; i < model.getCardIDs().size() + 20; i++) {
-            JButton b = new JButton("#" + i);
-            b.setPreferredSize(new Dimension(100, 180));
-            cardButtons.add(b);
-        }
-        JButton newCardButton = new JButton("+ card");
-
-        newCardButton.addActionListener((a) -> {
-
-        });
-
-        cardButtons.add(newCardButton);
+        addButtons(cardButtons);
 
         JScrollPane scrollPane = new JScrollPane(cardButtons);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -74,5 +63,35 @@ public class Editor {
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         frame.setVisible(true);
+    }
+
+    private void addButtons(JPanel cardButtons) {
+
+        for (UUID id : model.getCardIDs()) {
+            // Just for testing. Later we will have an image preview instead of text
+            JButton b = new JButton("#" + id.toString());
+
+            b.setPreferredSize(new Dimension(100, 180));
+            cardButtons.add(b);
+            b.addActionListener((a) -> {
+                JPanel editorPanel=new JPanel();
+                CardEditor e=new CardEditor(model, id, editorPanel);
+                frame.add(editorPanel);
+            });
+        }
+
+        JButton newCardButton = new JButton("+ card");
+
+        newCardButton.addActionListener((a) -> {
+            model.addCard();
+            cardButtons.removeAll();
+            addButtons(cardButtons);
+            
+            cardButtons.revalidate();
+            cardButtons.repaint();
+        });
+
+        cardButtons.add(newCardButton);
+
     }
 }

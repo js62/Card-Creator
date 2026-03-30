@@ -45,13 +45,13 @@ public class FileIO {
             SavableModel sm = new Gson().fromJson(json, SavableModel.class);
             Model model = new Model();
             model.setFolder(projectFolder);
-            model.setCanvasWidth(sm.canvasWidth);
-            model.setCanvasHeight(sm.canvasHeight);
-            model.setBackgroundImagePath(sm.backgroundImagePath);
-            model.setImgX(sm.imgX);
-            model.setImgY(sm.imgY);
-            model.setImgW(sm.imgW);
-            model.setImgH(sm.imgH);
+//            model.setCanvasWidth(sm.canvasWidth);
+//            model.setCanvasHeight(sm.canvasHeight);
+//            model.setBackgroundImagePath(sm.backgroundImagePath);
+//            model.setImgX(sm.imgX);
+//            model.setImgY(sm.imgY);
+//            model.setImgW(sm.imgW);
+//            model.setImgH(sm.imgH);
             return model;
         } catch (IOException ex) {
             System.out.println("Error loading project: " + ex);
@@ -75,27 +75,31 @@ public class FileIO {
 class SavableModel{
     
     String folder;
-    int canvasWidth;
-    int canvasHeight;
-    String backgroundImagePath;
-    // Image position and size on the canvas
-    int imgX;
-    int imgY;
-    int imgW;
-    int imgH;
+    int pageWidth;
+    int pageHeight;
+    int cardWidth;
+    int cardHeight;
+//    String backgroundImagePath;
+//    // Image position and size on the canvas
+//    int imgX;
+//    int imgY;
+//    int imgW;
+//    int imgH;
 
     
     public SavableModel() {}
 
     public SavableModel(Model m) {
         folder=m.getFolder().getAbsolutePath();
-        canvasWidth = m.getCanvasWidth();
-        canvasHeight= m.getCanvasHeight();
-        backgroundImagePath = m.getBackgroundImagePath();
-        imgX = m.getImgX();
-        imgY = m.getImgY();
-        imgW = m.getImgW();
-        imgH = m.getImgH();
+        pageWidth = m.getPageWidth();
+        pageHeight= m.getPageHeight();
+        cardWidth = m.getCardWidth();
+        cardHeight= m.getCardHeight();
+//        backgroundImagePath = m.getBackgroundImagePath();
+//        imgX = m.getImgX();
+//        imgY = m.getImgY();
+//        imgW = m.getImgW();
+//        imgH = m.getImgH();
     }
     
 }

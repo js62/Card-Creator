@@ -81,8 +81,8 @@ public class CardEditor {
 //        fileMenu.add(exportItem);
 //        menuBar.add(fileMenu);
 //        frame.setJMenuBar(menuBar);
-//
-//        canvas = new CardCanvas(model.getCanvasWidth(), model.getCanvasHeight());
+
+//        canvas = new CardCanvas(card.getWidth(), card.getHeight());
 //        frame.add(canvas, java.awt.BorderLayout.CENTER);
 //
 //        // Restore saved image and its position/size if available
