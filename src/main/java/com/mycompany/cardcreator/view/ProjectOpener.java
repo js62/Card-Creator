@@ -1,4 +1,4 @@
-package com.mycompany.cardcreator.Modules;
+package com.mycompany.cardcreator.view;
 
 import java.awt.GridLayout;
 import javax.swing.JFileChooser;
@@ -7,9 +7,10 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-
-import com.mycompany.cardcreator.Modules.FileIO;
 import javax.swing.JOptionPane;
+
+import com.mycompany.cardcreator.model.FileIO;
+import com.mycompany.cardcreator.controller.Editor;
 
 public class ProjectOpener {
 
