@@ -31,18 +31,14 @@ public class Editor {
         }
         OpenWindow();
     }
+    
+    
+    private void autoSave(){
+        FileIO.saveModel(model);
+    }
 
     private void OpenWindow() {
 
-        /* TODO: this window should use what swing calls a "card layout." This
-        will allow one screen to be pushed on top of another and popped off
-        later. The main screen should display all cards (which are clickable).
-        When one is clicked, a new screen (Jpanel) should be pushed on top of
-        the main screen. This panel will contain the card canvas and edit
-        options for this card.
-
-        The Jpanel that is pushed should be coded in the CardEditor file.
-         */
         frame = new JFrame("Card Editor: " + model.getFolder().getName());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -61,6 +57,10 @@ public class Editor {
         frame.setSize(400, 300);
         frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         frame.setVisible(true);
+        
+        // auto save every 10 seconds
+        Timer autoSaveTimer=new Timer(10000, e -> autoSave());
+        autoSaveTimer.start();
     }
 
     private void addButtons(JPanel cardButtons, JPanel container) {
@@ -107,6 +107,7 @@ public class Editor {
                     cardButtons.revalidate();
                     cardButtons.repaint();
                     cl.show(container, "main");
+                    FileIO.saveModel(model);
                 });
                 container.add(editorPanel, panelName);
                 cl.show(container, panelName);
