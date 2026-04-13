@@ -10,10 +10,6 @@ import com.mycompany.cardcreator.model.FileIO;
 import com.mycompany.cardcreator.model.Model;
 import com.mycompany.cardcreator.view.CardCanvas;
 
-/**
- * Controller for editing a single card. Sets up the canvas,
- * toolbox, and menu bar for this card.
- */
 public class CardEditor {
 
     private Card card;
@@ -40,6 +36,10 @@ public class CardEditor {
         JPanel leftPane = buildToolbox(model, canvas);
         screen.add(leftPane, BorderLayout.WEST);
 
+        // INSTRUCTIONS PANEL (ADDED)
+        JPanel rightPane = buildInstructionsPanel();
+        screen.add(rightPane, BorderLayout.EAST);
+
         // RESTORE SAVED IMAGE
         restoreImage(model);
 
@@ -47,7 +47,57 @@ public class CardEditor {
         buildMenuBar(model, frame, onBack);
     }
 
+    // INSTRUCTIONS PANEL
+    private JPanel buildInstructionsPanel() {
+        JPanel rightPane = new JPanel();
+        rightPane.setLayout(new BorderLayout());
+        rightPane.setPreferredSize(new java.awt.Dimension(255, 0));
+        rightPane.setBorder(BorderFactory.createTitledBorder("How to use: "));
+        rightPane.setBackground(java.awt.Color.WHITE);
 
+        JTextArea textArea = new JTextArea();
+        textArea.setEditable(false);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        textArea.setBackground(java.awt.Color.WHITE);
+        textArea.setText(
+        "1.) ADD CONTENT\n" +
+        "    Text : Click 'Add Text'\n" +
+        "    Shapes: Click 'Rectangle' or 'Circle'\n" +
+        "    Images: Click 'Import Image'\n\n" +
+
+        "2.) SELECT & MOVEMENT\n" +
+        "    Select : Click on element\n" +
+        "    Drag : Move element\n" +
+        "    Rotate : Use rotation control\n" +
+        "    Layer : Use layer control\n" +
+        "     *NOTE : Bigger number → Front\n\n"+
+
+        "3.) SHAPES\n" +
+        "    Resize : Drag corners\n" +
+        "    Outline : Click shape → Choose color\n" +
+        "    Fill : Right-click → Fill → Choose color\n\n" +
+       
+        "4.) TEXT\n" +
+        "    Color : Select text → Choose color\n" +
+        "    Font size : Use font size control\n\n " +
+                
+        "5.) DELETE\n" +
+        "    Right-click element → Delete\n\n" +
+
+        "6.) SAVE\n" +
+        "    File → Save project\n\n" +
+
+        "7.) EXPORT\n" +
+        "    File → Export Card\n"
+        );
+
+        JScrollPane scroll = new JScrollPane(textArea);
+        rightPane.add(scroll, BorderLayout.CENTER);
+
+        return rightPane;
+    }
+    
     // TOOLBOX
     private JPanel buildToolbox(Model model, CardCanvas canvas) {
         JPanel leftPane = new JPanel();
