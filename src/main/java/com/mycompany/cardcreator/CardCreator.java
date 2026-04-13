@@ -1,6 +1,6 @@
 package com.mycompany.cardcreator;
 
-import com.mycompany.cardcreator.Modules.ProjectOpener;
+import com.mycompany.cardcreator.view.ProjectOpener;
 import javax.swing.SwingUtilities;
 
 public class CardCreator {
