@@ -62,34 +62,34 @@ public class CardEditor {
         textArea.setBackground(java.awt.Color.WHITE);
         textArea.setText(
         "1.) ADD CONTENT\n" +
-        "    Text : Click 'Add Text'\n" +
-        "    Shapes: Click 'Rectangle' or 'Circle'\n" +
-        "    Images: Click 'Import Image'\n\n" +
+        "    - Text : Click 'Add Text'\n" +
+        "    - Shapes: Click 'Rectangle' or 'Circle'\n" +
+        "    - Images: Click 'Import Image'\n\n" +
 
         "2.) SELECT & MOVEMENT\n" +
-        "    Select : Click on element\n" +
-        "    Drag : Move element\n" +
-        "    Rotate : Use rotation control\n" +
-        "    Layer : Use layer control\n" +
-        "     *NOTE : Bigger number → Front\n\n"+
+        "    - Select : Click on element\n" +
+        "    - Drag : Move element\n" +
+        "    - Rotate : Use rotation control\n" +
+        "    - Layer : Use layer control\n" +
+        "      *NOTE : Bigger number → Front\n\n"+
 
         "3.) SHAPES\n" +
-        "    Resize : Drag corners\n" +
-        "    Outline : Click shape → Choose color\n" +
-        "    Fill : Right-click → Fill → Choose color\n\n" +
+        "    - Resize : Drag corners\n" +
+        "    - Outline : Click shape → Choose color\n" +
+        "    - Fill : Right-click → Fill → Choose color\n\n" +
        
         "4.) TEXT\n" +
-        "    Color : Select text → Choose color\n" +
-        "    Font size : Use font size control\n\n " +
+        "    - Color : Select text → Choose color\n" +
+        "    - Font size : Use font size control\n\n " +
                 
         "5.) DELETE\n" +
-        "    Right-click element → Delete\n\n" +
+        "    - Right-click element → Delete\n\n" +
 
         "6.) SAVE\n" +
-        "    File → Save project\n\n" +
+        "    - File → Save project\n\n" +
 
         "7.) EXPORT\n" +
-        "    File → Export Card\n"
+        "    - File → Export Card\n"
         );
 
         JScrollPane scroll = new JScrollPane(textArea);

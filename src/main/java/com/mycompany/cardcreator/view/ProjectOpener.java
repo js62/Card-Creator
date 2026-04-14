@@ -1,5 +1,6 @@
 package com.mycompany.cardcreator.view;
 
+import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import javax.swing.*;
 import java.io.File;
@@ -18,11 +19,14 @@ public class ProjectOpener {
     public ProjectOpener() {
 
         JFrame frame = new JFrame("Open Project");
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(2, 1, 20, 20));
+        JPanel panel = new JPanel(new BorderLayout(20, 20));
 
         JButton createFolder = new JButton("New Project");
         JButton selectFolder = new JButton("Select Project");
+
+        // LEFT SIDE (buttons stacked)
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new GridLayout(2, 1, 20, 20));
 
         createFolder.addActionListener((e) -> {
             if (ChooseProject(true)) frame.dispose();
@@ -32,13 +36,34 @@ public class ProjectOpener {
             if (ChooseProject(false)) frame.dispose();
         });
 
-        panel.add(createFolder);
-        panel.add(selectFolder);
+        buttonPanel.add(createFolder);
+        buttonPanel.add(selectFolder);
+
+        // RIGHT SIDE (instructions)
+        JTextArea instructions = new JTextArea(
+            "Instructions:\n\n" +
+            "1.) NEW PROJECT\n" +
+            "    - Create an EMPTY folder\n" +
+            "    *NOTE: If error occurs, delete saved folder.\n"+
+            "2.) SAVED PROJECT\n" +
+            "    - Choose an existing saved project folder.\n\n"  
+        );
+
+        instructions.setEditable(false);
+        instructions.setLineWrap(true);
+        instructions.setWrapStyleWord(true);
+
+        JScrollPane scrollPane = new JScrollPane(instructions);
+
+        // ADD TO MAIN PANEL
+        panel.add(buttonPanel, BorderLayout.WEST);   // left
+        panel.add(scrollPane, BorderLayout.CENTER);  // right
+
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         frame.add(panel);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(300, 200);
+        frame.setSize(500, 250); // slightly wider for right-side instructions
         frame.setVisible(true);
     }
 
