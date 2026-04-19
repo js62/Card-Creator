@@ -2,6 +2,7 @@ package com.mycompany.cardcreator.model;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.UUID;
 
 /**
  * Represents a single element on a card. Can be text, shape, or image.
@@ -9,6 +10,7 @@ import java.awt.Font;
  */
 public class CardElement {
 
+    public UUID id;
     public CardElementType type;
     public int x, y, width, height;
 

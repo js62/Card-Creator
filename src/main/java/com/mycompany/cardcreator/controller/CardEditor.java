@@ -21,7 +21,7 @@ public class CardEditor {
         card = model.getCard(cardID);
 
         // CANVAS
-        canvas = new CardCanvas(model.getPageWidth(), model.getPageHeight());
+        canvas = new CardCanvas(model, cardID, model.getPageWidth(), model.getPageHeight());
         screen.add(canvas, BorderLayout.CENTER);
 
         // LOAD EXISTING ELEMENTS FOR THIS CARD

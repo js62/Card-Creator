@@ -80,6 +80,7 @@ public class Model {
      */
     public UUID addCardElement(UUID cardID, CardElement element) {
         UUID id = UUID.randomUUID();
+        element.id = id;
         cardElements.put(id, element);
 
         Card card = cards.get(cardID);

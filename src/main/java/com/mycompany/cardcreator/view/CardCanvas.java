@@ -8,14 +8,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import com.mycompany.cardcreator.model.CardElement;
 import com.mycompany.cardcreator.model.CardElementType;
+import com.mycompany.cardcreator.model.Model;
 
 /**
  * Canvas panel that displays a card with a grid overlay.
  * Handles dragging, resizing, and inline editing of elements.
  */
 public class CardCanvas extends JPanel {
+
+    private Model model;
+    private UUID cardID;
 
     private BufferedImage backgroundImage;
     private int canvasWidth;
@@ -65,7 +70,9 @@ public class CardCanvas extends JPanel {
     }
 
 
-    public CardCanvas(int canvasWidth, int canvasHeight) {
+    public CardCanvas(Model model, UUID cardID, int canvasWidth, int canvasHeight) {
+        this.model = model;
+        this.cardID = cardID;
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
         this.imgW = canvasWidth;
@@ -293,6 +300,9 @@ public class CardCanvas extends JPanel {
                 JMenuItem deleteItem = new JMenuItem("Delete");
                 deleteItem.addActionListener(a -> {
                     elements.remove(el);
+                    if (el.id != null) {
+                        model.removeCardElement(cardID, el.id);
+                    }
                     if (selectedElement == el) {
                         selectedElement = null;
                         fireSelectionChanged();
