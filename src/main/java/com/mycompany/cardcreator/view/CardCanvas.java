@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -464,7 +465,9 @@ public class CardCanvas extends JPanel {
         return sorted;
     }
 
-    // loads an image from disk, caches it so we dont re-read every frame
+    // loads an image from disk, caches it so we dont re-read every frame.
+    // paths are stored relative to the project folder, but legacy saves may
+    // hold absolute paths -- Path.resolve handles both correctly
     private BufferedImage loadImage(String path) {
         if (path == null) {
             return null;
@@ -473,7 +476,12 @@ public class CardCanvas extends JPanel {
             return imageCache.get(path);
         }
         try {
-            BufferedImage img = javax.imageio.ImageIO.read(new java.io.File(path));
+            Path projectFolder = model.getFolder();
+            Path resolved = (projectFolder != null)
+                ? projectFolder.resolve(path)
+                : Path.of(path);
+
+            BufferedImage img = javax.imageio.ImageIO.read(resolved.toFile());
             if (img != null) {
                 imageCache.put(path, img);
             }

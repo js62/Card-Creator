@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.image.BufferedImage;
+import java.nio.file.Path;
 import java.util.UUID;
 import java.util.function.Predicate;
 import javax.swing.*;
@@ -312,7 +313,15 @@ public class Toolbox extends JPanel {
                             50 + offset, 50 + offset,
                             img.getWidth(), img.getHeight()
                         );
-                        el.imagePath = chooser.getSelectedFile().getAbsolutePath();
+                        // store path relative to the project folder so the
+                        // project stays portable when moved to another machine
+                        Path chosen = chooser.getSelectedFile().toPath();
+                        Path projectFolder = model.getFolder();
+                        if (projectFolder != null && chosen.isAbsolute()) {
+                            el.imagePath = projectFolder.relativize(chosen).toString();
+                        } else {
+                            el.imagePath = chosen.toString();
+                        }
                         el.zLayer = canvas.getElements().size();
                         model.addCardElement(cardID, el);
                         canvas.addElement(el);

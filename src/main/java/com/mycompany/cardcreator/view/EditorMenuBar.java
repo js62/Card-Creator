@@ -2,6 +2,7 @@ package com.mycompany.cardcreator.view;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.UUID;
 import javax.swing.*;
 import com.mycompany.cardcreator.model.FileIO;
@@ -17,23 +18,22 @@ public class EditorMenuBar extends JMenuBar {
 
     private final JLabel lastSavedLabel = new JLabel("Last saved: --:--:--");
 
+    private final Model model;
+    private final UUID cardID;
+    private final CardCanvas canvas;
+
 
     public EditorMenuBar(Model model, UUID cardID, CardCanvas canvas, JFrame frame, Runnable onBack) {
+        this.model = model;
+        this.cardID = cardID;
+        this.canvas = canvas;
+
         JMenu fileMenu = new JMenu("File");
 
-        // back button - auto saves a preview then returns to card list
+        // back button - saves a preview then returns to card list
         JMenuItem backItem = new JMenuItem("Back");
         backItem.addActionListener(e -> {
-            // save a preview so the card list thumbnail is always current
-            try {
-                BufferedImage preview = canvas.exportAsImage();
-                File previewFile = new File(
-                    model.getFolder(), "card_" + cardID + ".png"
-                );
-                javax.imageio.ImageIO.write(preview, "png", previewFile);
-            } catch (Exception ex) {
-                System.out.println("Could not save preview: " + ex);
-            }
+            saveCardPreview();
 
             frame.setJMenuBar(null);
             frame.revalidate();
@@ -48,6 +48,7 @@ public class EditorMenuBar extends JMenuBar {
             model.setImgW(canvas.getImgW());
             model.setImgH(canvas.getImgH());
             FileIO.saveModel(model);
+            saveCardPreview();
             updateLastSaved();
             JOptionPane.showMessageDialog(frame, "Project saved.");
         });
@@ -55,14 +56,15 @@ public class EditorMenuBar extends JMenuBar {
         // exports the card as a png, also saves a preview for the card list
         JMenuItem exportItem = new JMenuItem("Export Card");
         exportItem.addActionListener(e -> {
-            JFileChooser chooser = new JFileChooser(model.getFolder());
-            chooser.setSelectedFile(new File(model.getFolder(), "card_export.png"));
+            // JFileChooser is a Swing component and works in File, so we
+            // bridge to/from Path at this boundary
+            JFileChooser chooser = new JFileChooser(model.getFolder().toFile());
+            chooser.setSelectedFile(model.getFolder().resolve("card_export.png").toFile());
             chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
                 "PNG Image", "png"
             ));
 
-            if (chooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION)
-                {
+            if (chooser.showSaveDialog(frame) == JFileChooser.APPROVE_OPTION) {
                 try {
                     BufferedImage exportImg = canvas.exportAsImage();
                     File outFile = chooser.getSelectedFile();
@@ -72,10 +74,8 @@ public class EditorMenuBar extends JMenuBar {
                     javax.imageio.ImageIO.write(exportImg, "png", outFile);
 
                     // save preview copy for the card list thumbnails
-                    File preview = new File(
-                        model.getFolder(), "card_" + cardID + ".png"
-                    );
-                    javax.imageio.ImageIO.write(exportImg, "png", preview);
+                    Path preview = model.getFolder().resolve("card_" + cardID + ".png");
+                    javax.imageio.ImageIO.write(exportImg, "png", preview.toFile());
                     JOptionPane.showMessageDialog(frame, "Exported to:\n" + outFile.getAbsolutePath());
 
                 } catch (Exception ex) {
@@ -96,5 +96,18 @@ public class EditorMenuBar extends JMenuBar {
 
     public void updateLastSaved() {
         lastSavedLabel.setText("Last saved: " + LocalTime.now().format(TIME_FORMAT));
+    }
+
+
+    // re-renders the current card to a png so the card list thumbnail stays
+    // fresh. called from manual save, back, and the autosave timer
+    public void saveCardPreview() {
+        try {
+            BufferedImage preview = canvas.exportAsImage();
+            Path previewFile = model.getFolder().resolve("card_" + cardID + ".png");
+            javax.imageio.ImageIO.write(preview, "png", previewFile.toFile());
+        } catch (Exception ex) {
+            System.out.println("Could not save preview: " + ex);
+        }
     }
 }

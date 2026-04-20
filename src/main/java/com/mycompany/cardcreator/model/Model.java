@@ -1,6 +1,6 @@
 package com.mycompany.cardcreator.model;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.UUID;
@@ -13,7 +13,7 @@ public class Model {
     public Model() {
     }
 
-    private File projectFolder = null;
+    private Path projectFolder = null;
 
     //pdf output dimensions, divisble by grid size 25
     private int pageWidth = 675;
@@ -31,12 +31,44 @@ public class Model {
     private int imgW = 0;
     private int imgH = 0;
 
-    public String getBackgroundImagePath() {
+    // raw stored value (relative to the project folder, persisted to json).
+    // package-private so FileIO can round-trip it; callers should use
+    // setBackgroundImage / resolveBackgroundImage instead.
+    String getBackgroundImagePath() {
         return backgroundImagePath;
     }
 
-    public void setBackgroundImagePath(String path) {
+    void setBackgroundImagePath(String path) {
         backgroundImagePath = path;
+    }
+
+    /**
+     * Public setter for the background image. Stores the path relative to the
+     * project folder so the project stays portable across machines. Pass null
+     * to clear.
+     */
+    public void setBackgroundImage(Path imageFile) {
+        if (imageFile == null) {
+            backgroundImagePath = null;
+            return;
+        }
+        if (projectFolder != null && imageFile.isAbsolute()) {
+            backgroundImagePath = projectFolder.relativize(imageFile).toString();
+        } else {
+            backgroundImagePath = imageFile.toString();
+        }
+    }
+
+    /**
+     * Resolves the stored background image path against the project folder.
+     * Returns null if no background is set. If the stored value is already
+     * absolute (older saves) it's returned as-is.
+     */
+    public Path resolveBackgroundImage() {
+        if (backgroundImagePath == null || projectFolder == null) {
+            return null;
+        }
+        return projectFolder.resolve(backgroundImagePath);
     }
 
     public int getImgX() {
@@ -132,11 +164,11 @@ public class Model {
     }
 
 
-    public void setFolder(File folder) {
+    public void setFolder(Path folder) {
         projectFolder = folder;
     }
 
-    public File getFolder() {
+    public Path getFolder() {
         return projectFolder;
     }
 

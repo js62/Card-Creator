@@ -3,7 +3,7 @@ package com.mycompany.cardcreator.controller;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
-import java.io.File;
+import java.nio.file.Path;
 import java.util.UUID;
 import javax.swing.*;
 
@@ -54,12 +54,13 @@ public class CardEditor {
 
 
     // RESTORE SAVED IMAGE
-    private void restoreImage(Model model,CardCanvas canvas) {
-        if (model.getBackgroundImagePath() == null) {
+    private void restoreImage(Model model, CardCanvas canvas) {
+        Path imagePath = model.resolveBackgroundImage();
+        if (imagePath == null) {
             return;
         }
         try {
-            BufferedImage img =javax.imageio.ImageIO.read(new File(model.getBackgroundImagePath()));
+            BufferedImage img = javax.imageio.ImageIO.read(imagePath.toFile());
 
             if (img != null) {
                 canvas.setBackgroundImage(img);

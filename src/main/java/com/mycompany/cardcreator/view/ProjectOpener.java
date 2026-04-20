@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import javax.swing.*;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -74,9 +76,16 @@ public class ProjectOpener {
 
         int result = chooser.showOpenDialog(null);
         if (result == JFileChooser.APPROVE_OPTION) {
-            File selectedFolder = chooser.getSelectedFile();
+            // bridge from Swing's File API to nio Path at this boundary
+            File selectedFile = chooser.getSelectedFile();
+            Path selectedFolder = selectedFile.toPath();
+
             if (create) {
-                if (selectedFolder.isDirectory() && selectedFolder.list().length == 0) {
+                boolean isEmptyDir = Files.isDirectory(selectedFolder)
+                    && selectedFile.list() != null
+                    && selectedFile.list().length == 0;
+
+                if (isEmptyDir) {
                     FileIO.createProject(selectedFolder);
                 } else {
                     JOptionPane.showMessageDialog(null, "Please select empty folder for your new.");

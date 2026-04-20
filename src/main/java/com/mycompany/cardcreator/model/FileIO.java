@@ -1,7 +1,7 @@
 package com.mycompany.cardcreator.model;
 
-import java.io.File;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
@@ -16,12 +16,12 @@ public class FileIO {
 
     // saves the entire model to data.json in the project folder
     public static void saveModel(Model model) {
-        File dataFile = new File(model.getFolder(), "data.json");
+        Path dataFile = model.getFolder().resolve("data.json");
         SavableModel m = new SavableModel(model);
         String json = new GsonBuilder().setPrettyPrinting().create().toJson(m);
 
         try {
-            Files.writeString(dataFile.toPath(), json);
+            Files.writeString(dataFile, json);
         } catch (IOException ex) {
             System.out.println(ex);
         }
@@ -31,14 +31,14 @@ public class FileIO {
      * Loads a Model from the data.json in the given folder.
      * Returns null if file doesnt exist or cant be read.
      */
-    public static Model loadModel(File projectFolder) {
-        File dataFile = new File(projectFolder, "data.json");
-        if (!dataFile.exists()) {
+    public static Model loadModel(Path projectFolder) {
+        Path dataFile = projectFolder.resolve("data.json");
+        if (!Files.exists(dataFile)) {
             System.out.println("No data.json found in " + projectFolder);
             return null;
         }
         try {
-            String json = Files.readString(dataFile.toPath());
+            String json = Files.readString(dataFile);
             SavableModel sm = new Gson().fromJson(json, SavableModel.class);
 
             Model model = new Model();
@@ -82,7 +82,7 @@ public class FileIO {
     }
 
     // creates a brand new empty project
-    public static void createProject(File projectFolder) {
+    public static void createProject(Path projectFolder) {
         Model model = new Model();
         model.setFolder(projectFolder);
         saveModel(model);
@@ -125,7 +125,7 @@ class SavableModel {
     public SavableModel() {}
 
     public SavableModel(Model m) {
-        folder = m.getFolder().getAbsolutePath();
+        folder = m.getFolder().toAbsolutePath().toString();
         pageWidth = m.getPageWidth();
         pageHeight = m.getPageHeight();
         cardWidth = m.getCardWidth();

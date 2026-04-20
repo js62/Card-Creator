@@ -5,7 +5,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Image;
 import javax.swing.*;
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.UUID;
 
 import com.mycompany.cardcreator.model.Model;
@@ -21,7 +22,7 @@ public class CardListView {
     private Model model;
     private JFrame frame;
 
-    public CardListView(File projectFolder) {
+    public CardListView(Path projectFolder) {
         //load project from file
         model = FileIO.loadModel(projectFolder);
         if (model == null) {
@@ -35,14 +36,18 @@ public class CardListView {
     private void autoSave() {
         FileIO.saveModel(model);
 
+        // if the editor view is open, also refresh the thumbnail and the
+        // last saved indicator on the menu bar
         if (frame != null && frame.getJMenuBar() instanceof EditorMenuBar) {
-            ((EditorMenuBar) frame.getJMenuBar()).updateLastSaved();
+            EditorMenuBar bar = (EditorMenuBar) frame.getJMenuBar();
+            bar.saveCardPreview();
+            bar.updateLastSaved();
         }
     }
 
     private void OpenWindow() {
 
-        frame = new JFrame("Card Editor: " + model.getFolder().getName());
+        frame = new JFrame("Card Editor: " + model.getFolder().getFileName());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel container = new JPanel(new CardLayout());
@@ -81,10 +86,10 @@ public class CardListView {
             b.setPreferredSize(btnSize);
 
             // check if theres a preview image from a previous export
-            File preview = new File(model.getFolder(), "card_" + id + ".png");
-            if (preview.exists()) {
+            Path preview = model.getFolder().resolve("card_" + id + ".png");
+            if (Files.exists(preview)) {
                 try {
-                    Image img = javax.imageio.ImageIO.read(preview);
+                    Image img = javax.imageio.ImageIO.read(preview.toFile());
                     if (img != null) {
                         img = img.getScaledInstance(btnW, btnH, Image.SCALE_SMOOTH);
                         b.setIcon(new ImageIcon(img));
