@@ -15,6 +15,7 @@ import javax.swing.event.DocumentListener;
 import com.mycompany.cardcreator.model.CardElement;
 import com.mycompany.cardcreator.model.CardElementType;
 import com.mycompany.cardcreator.model.Model;
+import com.mycompany.cardcreator.util.SoundPlayer;
 
 public class Toolbox extends JPanel {
 
@@ -115,6 +116,7 @@ public class Toolbox extends JPanel {
         JButton addTextBtn = new JButton("Add Text");
         addTextBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         addTextBtn.addActionListener(e -> {
+            SoundPlayer.playClick();
             int offset = canvas.getElements().size() * 25;
             CardElement el = new CardElement(
                 CardElementType.TEXT, 50 + offset, 50 + offset, 200, 50
@@ -196,6 +198,7 @@ public class Toolbox extends JPanel {
         JButton btn = new JButton(label);
         btn.setAlignmentX(Component.CENTER_ALIGNMENT);
         btn.addActionListener(e -> {
+            SoundPlayer.playClick();
             int offset = canvas.getElements().size() * 25;
             CardElement el = new CardElement(type, 50 + offset, 50 + offset, w, h);
             model.addCardElement(cardID, el);
@@ -273,6 +276,7 @@ public class Toolbox extends JPanel {
             swatch.setOpaque(true);
             swatch.setBorderPainted(true);
             swatch.addActionListener(e -> {
+                SoundPlayer.playClick();
                 CardElement sel = canvas.getSelectedElement();
                 if (sel != null && appliesTo.test(sel)) {
                     sel.setColor(c);
@@ -297,6 +301,7 @@ public class Toolbox extends JPanel {
         JButton importBtn = new JButton("Import Image");
         importBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         importBtn.addActionListener(e -> {
+            SoundPlayer.playClick();
             JFileChooser chooser = new JFileChooser();
             chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
                 "Images", "png", "jpg", "jpeg", "bmp", "gif"

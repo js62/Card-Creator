@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import com.mycompany.cardcreator.model.Model;
 import com.mycompany.cardcreator.model.FileIO;
+import com.mycompany.cardcreator.util.SoundPlayer;
 import com.mycompany.cardcreator.view.EditorMenuBar;
 
 /**
@@ -106,6 +107,7 @@ public class CardListView {
             cardButtons.add(b);
 
             b.addActionListener((a) -> {
+                SoundPlayer.playClick();
                 String panelName = "card-" + id.toString();
                 JPanel editorPanel = new JPanel(new java.awt.BorderLayout());
                 new CardEditor(model, id, editorPanel, frame, () -> {
@@ -128,6 +130,7 @@ public class CardListView {
         newCardButton.setPreferredSize(btnSize);
 
         newCardButton.addActionListener((a) -> {
+            SoundPlayer.playClick();
             model.addCard();
             FileIO.saveModel(model);
             cardButtons.removeAll();

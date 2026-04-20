@@ -15,6 +15,7 @@ import javax.swing.JOptionPane;
 
 import com.mycompany.cardcreator.model.FileIO;
 import com.mycompany.cardcreator.controller.CardListView;
+import com.mycompany.cardcreator.util.SoundPlayer;
 
 public class ProjectOpener {
 
@@ -31,10 +32,12 @@ public class ProjectOpener {
         buttonPanel.setLayout(new GridLayout(2, 1, 20, 20));
 
         createFolder.addActionListener((e) -> {
+            SoundPlayer.playClick();
             if (ChooseProject(true)) frame.dispose();
         });
 
         selectFolder.addActionListener((e) -> {
+            SoundPlayer.playClick();
             if (ChooseProject(false)) frame.dispose();
         });
 

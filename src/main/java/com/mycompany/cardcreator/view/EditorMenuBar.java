@@ -7,6 +7,7 @@ import java.util.UUID;
 import javax.swing.*;
 import com.mycompany.cardcreator.model.FileIO;
 import com.mycompany.cardcreator.model.Model;
+import com.mycompany.cardcreator.util.SoundPlayer;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -33,6 +34,7 @@ public class EditorMenuBar extends JMenuBar {
         // back button - saves a preview then returns to card list
         JMenuItem backItem = new JMenuItem("Back");
         backItem.addActionListener(e -> {
+            SoundPlayer.playClick();
             saveCardPreview();
 
             frame.setJMenuBar(null);
@@ -43,6 +45,7 @@ public class EditorMenuBar extends JMenuBar {
         // saves all element positions and model data to json
         JMenuItem saveItem = new JMenuItem("Save");
         saveItem.addActionListener(e -> {
+            SoundPlayer.playClick();
             model.setImgX(canvas.getImgX());
             model.setImgY(canvas.getImgY());
             model.setImgW(canvas.getImgW());
@@ -56,6 +59,7 @@ public class EditorMenuBar extends JMenuBar {
         // exports the card as a png, also saves a preview for the card list
         JMenuItem exportItem = new JMenuItem("Export Card");
         exportItem.addActionListener(e -> {
+            SoundPlayer.playClick();
             // JFileChooser is a Swing component and works in File, so we
             // bridge to/from Path at this boundary
             JFileChooser chooser = new JFileChooser(model.getFolder().toFile());

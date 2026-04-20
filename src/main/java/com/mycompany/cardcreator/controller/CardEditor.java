@@ -11,6 +11,7 @@ import javax.swing.*;
 import com.mycompany.cardcreator.model.Card;
 import com.mycompany.cardcreator.model.CardElement;
 import com.mycompany.cardcreator.model.Model;
+import com.mycompany.cardcreator.util.SoundPlayer;
 import com.mycompany.cardcreator.view.CardCanvas;
 import com.mycompany.cardcreator.view.EditorMenuBar;
 import com.mycompany.cardcreator.view.InstructionsPanel;
@@ -19,6 +20,8 @@ import com.mycompany.cardcreator.view.Toolbox;
 public class CardEditor {
 
     public CardEditor(Model model, UUID cardID, JPanel screen, JFrame frame, Runnable onBack) {
+        SoundPlayer.playSound("Sounds/EditorLoadSound.wav");
+
         Card card = model.getCard(cardID);
 
         // CANVAS
