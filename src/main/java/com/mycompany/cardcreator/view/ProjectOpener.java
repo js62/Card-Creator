@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JOptionPane;
 
 import com.mycompany.cardcreator.model.FileIO;
-import com.mycompany.cardcreator.controller.Editor;
+import com.mycompany.cardcreator.controller.CardListView;
 
 public class ProjectOpener {
 
@@ -83,7 +83,7 @@ public class ProjectOpener {
                     return false;
                 }
             }
-            new Editor(selectedFolder);
+            new CardListView(selectedFolder);
             return true;
         }
         return false;

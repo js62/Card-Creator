@@ -51,7 +51,6 @@ public class CardCanvas extends JPanel {
     private boolean resizingElement = false;
     private int elementResizeCorner = -1;
     private int elementDragOffsetX, elementDragOffsetY;
-    private JTextPane editingPane = null;
 
     // cache loaded images so we dont read from disk every repaint
     private Map<String, BufferedImage> imageCache = new HashMap<>();
@@ -69,6 +68,39 @@ public class CardCanvas extends JPanel {
         }
     }
 
+    // fits panel scale, so  card aspect ratio is maintained
+    private double getScale() 
+    {
+        if (canvasWidth <= 0 || canvasHeight <= 0 || getWidth() <= 0 || getHeight() <= 0) {
+            return 1.0;
+        }
+        double sx = (double) getWidth() / canvasWidth;
+        double sy = (double) getHeight() / canvasHeight;
+        return Math.min(sx, sy);
+    }
+
+    private int getOffsetX()
+    {
+        return (int)((getWidth() - canvasWidth * getScale()) / 2);
+    }
+
+    private int getOffsetY() 
+    {
+        return (int)((getHeight() - canvasHeight*getScale()) / 2);
+    }
+
+    // screen coord to card coord
+    private int toCardX(int screenX) 
+    {
+        double s = getScale();
+        return s == 0 ? 0 : (int) ((screenX - getOffsetX()) / s);
+    }
+
+    private int toCardY(int screenY) {
+        double s = getScale();
+        return s == 0 ? 0 : (int) ((screenY - getOffsetY()) / s);
+    }
+
 
     public CardCanvas(Model model, UUID cardID, int canvasWidth, int canvasHeight) {
         this.model = model;
@@ -78,17 +110,12 @@ public class CardCanvas extends JPanel {
         this.imgW = canvasWidth;
         this.imgH = canvasHeight;
         setBackground(Color.WHITE);
-        setLayout(null); // null layout so we can place the text edit pane anywhere
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                finishEditing();
-
-                int cx = (getWidth() - canvasWidth) / 2 - 80;
-                int cy = (getHeight() - canvasHeight) / 2;
-                int mx = e.getX() - cx;
-                int my = e.getY() - cy;
+                int mx = toCardX(e.getX());
+                int my = toCardY(e.getY());
 
                 // RIGHT CLICK - show context menu on elements
                 if (SwingUtilities.isRightMouseButton(e)) {
@@ -182,35 +209,13 @@ public class CardCanvas extends JPanel {
                 }
             }
 
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                // double click to edit text elements
-                if (e.getClickCount() == 2) {
-                    int cx = (getWidth() - canvasWidth) / 2 - 80;
-                    int cy = (getHeight() - canvasHeight) / 2;
-                    int mx = e.getX() - cx;
-                    int my = e.getY() - cy;
-
-                    for (int i = elements.size() - 1; i >= 0; i--) {
-                        CardElement el = elements.get(i);
-                        if (el.type == CardElementType.TEXT
-                                && mx >= el.x && mx <= el.x + el.width
-                                && my >= el.y && my <= el.y + el.height) {
-                            startEditing(el, cx, cy);
-                            return;
-                        }
-                    }
-                }
-            }
         });
 
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                int cx = (getWidth() - canvasWidth) / 2 - 80;
-                int cy = (getHeight() - canvasHeight) / 2;
-                int mx = e.getX() - cx;
-                int my = e.getY() - cy;
+                int mx = toCardX(e.getX());
+                int my = toCardY(e.getY());
 
                 if (draggingElement && selectedElement != null) {
                     selectedElement.x = mx - elementDragOffsetX;
@@ -234,10 +239,8 @@ public class CardCanvas extends JPanel {
 
             @Override
             public void mouseMoved(MouseEvent e) {
-                int cx = (getWidth() - canvasWidth) / 2 - 80;
-                int cy = (getHeight() - canvasHeight) / 2;
-                int mx = e.getX() - cx;
-                int my = e.getY() - cy;
+                int mx = toCardX(e.getX());
+                int my = toCardY(e.getY());
 
                 // check element resize handles first
                 if (selectedElement != null) {
@@ -428,33 +431,6 @@ public class CardCanvas extends JPanel {
         return -1;
     }
 
-    // opens inline text editor over a text element
-    private void startEditing(CardElement el, int cx, int cy) {
-        selectedElement = el;
-        fireSelectionChanged();
-        editingPane = new JTextPane();
-        editingPane.setText(el.text);
-        editingPane.setFont(el.getFont());
-        editingPane.setBounds(cx + el.x, cy + el.y, el.width, el.height);
-        editingPane.setOpaque(false);
-        add(editingPane);
-        editingPane.requestFocusInWindow();
-        revalidate();
-        repaint();
-    }
-
-    // saves text from the inline editor back to the element
-    private void finishEditing() {
-        if (editingPane != null && selectedElement != null) {
-            selectedElement.text = editingPane.getText();
-            remove(editingPane);
-            editingPane = null;
-            revalidate();
-            repaint();
-        }
-    }
-
-
     public void addElement(CardElement el) {
         elements.add(el);
         selectedElement = el;
@@ -473,6 +449,12 @@ public class CardCanvas extends JPanel {
 
     public List<CardElement> getElements() {
         return elements;
+    }
+
+    public void clearSelection() {
+        selectedElement = null;
+        fireSelectionChanged();
+        repaint();
     }
 
     // returns elements sorted by z layer for rendering
@@ -556,39 +538,41 @@ public class CardCanvas extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g;
+        Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        int cx = (getWidth() - canvasWidth) / 2 - 80;
-        int cy = (getHeight() - canvasHeight) / 2;
+        double s = getScale();
+        g2.translate(getOffsetX(), getOffsetY());
+        g2.scale(s, s);
 
         // white card background
         g2.setColor(Color.WHITE);
-        g2.fillRect(cx, cy, canvasWidth, canvasHeight);
+        g2.fillRect(0, 0, canvasWidth, canvasHeight);
 
         // draw background image if we have one
         if (backgroundImage != null) {
-            g2.drawImage(backgroundImage, cx + imgX, cy + imgY, imgW, imgH, null);
+            g2.drawImage(backgroundImage, imgX, imgY, imgW, imgH, null);
         }
 
         // grid overlay
         g2.setColor(new Color(200, 200, 200));
         for (int gx = 0; gx <= canvasWidth; gx += GRID_SIZE) {
-            g2.drawLine(cx + gx, cy, cx + gx, cy + canvasHeight);
+            g2.drawLine(gx, 0, gx, canvasHeight);
         }
         for (int gy = 0; gy <= canvasHeight; gy += GRID_SIZE) {
-            g2.drawLine(cx, cy + gy, cx + canvasWidth, cy + gy);
+            g2.drawLine(0, gy, canvasWidth, gy);
         }
 
         // draw all elements sorted by their z layer
         for (CardElement el : getSortedElements()) {
-            drawElement(g2, el, cx, cy, true);
+            drawElement(g2, el, 0, 0, true);
         }
 
         // card border
         g2.setColor(Color.BLACK);
         g2.setStroke(new BasicStroke(2));
-        g2.drawRect(cx, cy, canvasWidth, canvasHeight);
+        g2.drawRect(0, 0, canvasWidth, canvasHeight);
+        g2.dispose();
     }
 
 
@@ -612,6 +596,8 @@ public class CardCanvas extends JPanel {
                 int lineHeight = fm.getHeight();
                 int textY = cy + el.y + fm.getAscent();
 
+                java.awt.Shape oldClip = g2.getClip();
+                g2.clipRect(cx + el.x, cy + el.y, el.width, el.height);
                 for (String line : wrapText(el.text, fm, el.width)) {
                     g2.drawString(line, cx + el.x, textY);
                     textY += lineHeight;
@@ -619,11 +605,14 @@ public class CardCanvas extends JPanel {
                         break;
                     }
                 }
+                g2.setClip(oldClip);
 
-                // dashed border around text box
-                g2.setColor(new Color(100, 100, 255));
-                g2.setStroke(new BasicStroke(1));
-                g2.drawRect(cx + el.x, cy + el.y, el.width, el.height);
+                if (showHandles && el == selectedElement)
+                {
+                    g2.setColor(new Color(100, 100, 255));
+                    g2.setStroke(new BasicStroke(1));
+                    g2.drawRect(cx + el.x, cy + el.y, el.width, el.height);
+                }
                 break;
 
             case RECTANGLE:
@@ -687,6 +676,20 @@ public class CardCanvas extends JPanel {
         StringBuilder current = new StringBuilder();
 
         for (String word : words) {
+            // break a single word that is wider than maxWidth into chunks
+            while (fm.stringWidth(word) > maxWidth) {
+                int cut = 1;
+                while (cut < word.length() && fm.stringWidth(word.substring(0, cut + 1)) <= maxWidth) {
+                    cut++;
+                }
+                if (current.length() > 0) {
+                    lines.add(current.toString());
+                    current = new StringBuilder();
+                }
+                lines.add(word.substring(0, cut));
+                word = word.substring(cut);
+            }
+
             if (current.length() == 0) {
                 current.append(word);
             } else if (fm.stringWidth(current + " " + word) <= maxWidth) {

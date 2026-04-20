@@ -10,19 +10,17 @@ import java.util.UUID;
 
 import com.mycompany.cardcreator.model.Model;
 import com.mycompany.cardcreator.model.FileIO;
-import com.mycompany.cardcreator.view.CardCanvas;
 
 /**
  * Main editor window. Shows all cards in a project and lets
  * you click into each one to edit it.
  */
-public class Editor {
+public class CardListView {
 
     private Model model;
     private JFrame frame;
-    private CardCanvas canvas;
 
-    public Editor(File projectFolder) {
+    public CardListView(File projectFolder) {
         //load project from file
         model = FileIO.loadModel(projectFolder);
         if (model == null) {
