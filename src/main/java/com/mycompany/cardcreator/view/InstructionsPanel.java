@@ -29,25 +29,27 @@ public class InstructionsPanel extends JPanel {
         "    - Drag : Move element\n" +
         "    - Rotate : Use rotation control\n" +
         "    - Layer : Use layer control\n" +
-        "      *NOTE : Bigger number → Front\n\n"+
+        "      *NOTE : Bigger number ->Front\n\n"+
 
         "3.) SHAPES\n" +
         "    - Resize : Drag corners\n" +
         "    - Outline : Click shape → Choose color\n" +
-        "    - Fill : Right-click → Fill → Choose color\n\n" +
+        "    - Fill : Right-click -> Fill -> Choose color\n\n" +
 
         "4.) TEXT\n" +
-        "    - Color : Select text → Choose color\n" +
+        "    - Color : Select text -> Choose color\n" +
         "    - Font size : Use font size control\n\n " +
 
         "5.) DELETE\n" +
-        "    - Right-click element → Delete\n\n" +
+        "    - Right-click element -> Delete\n\n" +
 
         "6.) SAVE\n" +
-        "    - File → Save project\n\n" +
+        "    - File -> Save project\n\n" +
 
         "7.) EXPORT\n" +
-        "    - File → Export Card\n"
+        "    - File -> Export Card\n\n" +
+        "8.) REDO - Ctrl+ Y\n" +
+        "9.) UNDO - Ctrl+ Z"
         );
 
         JScrollPane scroll = new JScrollPane(textArea);

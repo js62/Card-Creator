@@ -5,6 +5,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.image.BufferedImage;
 import java.nio.file.Path;
 import java.util.UUID;
@@ -15,6 +17,9 @@ import javax.swing.event.DocumentListener;
 import com.mycompany.cardcreator.model.CardElement;
 import com.mycompany.cardcreator.model.CardElementType;
 import com.mycompany.cardcreator.model.Model;
+import com.mycompany.cardcreator.util.ActionsManager;
+import com.mycompany.cardcreator.util.AddedElementRecord;
+import com.mycompany.cardcreator.util.ElementSnapshot;
 import com.mycompany.cardcreator.util.SoundPlayer;
 
 public class Toolbox extends JPanel {
@@ -22,9 +27,15 @@ public class Toolbox extends JPanel {
     private Model model;
     private UUID cardID;
     private CardCanvas canvas;
+    private ActionsManager actions;
 
     private JTextField textField;
     private boolean updatingTextField = false;
+
+    // snapshot of the text element when the text field gained focus. committed
+    // to the undo stack on focus loss so one editing session = one undo step
+    private ElementSnapshot textBefore = null;
+    private CardElement textTarget = null;
 
     // preset color palette shared by text and shape color sections
     private static final Color[] PALETTE = {
@@ -40,10 +51,11 @@ public class Toolbox extends JPanel {
         new Color(255, 192, 203), new Color(255, 215, 0)
     };
 
-    public Toolbox(Model model, UUID cardID, CardCanvas canvas) {
+    public Toolbox(Model model, UUID cardID, CardCanvas canvas, ActionsManager actions) {
         this.model = model;
         this.cardID = cardID;
         this.canvas = canvas;
+        this.actions = actions;
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBorder(BorderFactory.createCompoundBorder(
@@ -89,6 +101,9 @@ public class Toolbox extends JPanel {
 
         // update toolbox values when a different element gets selected
         canvas.setOnSelectionChanged(() -> {
+            // flush any pending text edit before switching target -- otherwise
+            // the focus-lost listener fires after textTarget was reassigned
+            commitTextEdit();
             CardElement sel = canvas.getSelectedElement();
             if (sel != null) {
                 if (sel.type == CardElementType.TEXT) {
@@ -101,6 +116,26 @@ public class Toolbox extends JPanel {
                 layerSpinner.setValue(sel.zLayer);
             }
         });
+    }
+
+
+    // records mutation as one coalesced change on the given element.
+    // callers pass the selected element + a lambda that flips a field; we
+    // snapshot before and after so the undo system can roll it back
+    private void recordAndApply(CardElement el, Runnable mutation) {
+        ElementSnapshot before = new ElementSnapshot(el);
+        mutation.run();
+        actions.recordChange(el, canvas, before, new ElementSnapshot(el));
+    }
+
+    // commits the pending text edit (if any). called on focus loss and when
+    // the selection changes out from under the text field
+    private void commitTextEdit() {
+        if (textTarget != null && textBefore != null) {
+            actions.recordChange(textTarget, canvas, textBefore, new ElementSnapshot(textTarget));
+        }
+        textTarget = null;
+        textBefore = null;
     }
 
 
@@ -123,6 +158,7 @@ public class Toolbox extends JPanel {
             );
             model.addCardElement(cardID, el);
             canvas.addElement(el);
+            actions.record(new AddedElementRecord(model, canvas, cardID, el));
         });
         section.add(addTextBtn);
         section.add(Box.createVerticalStrut(8));
@@ -144,6 +180,13 @@ public class Toolbox extends JPanel {
                 if (updatingTextField) return;
                 CardElement sel = canvas.getSelectedElement();
                 if (sel != null && sel.type == CardElementType.TEXT) {
+                    // capture: first keystroke in a focus session records
+                    // the starting snapshot. commitTextEdit pushes it on focus
+                    // loss (or when selection changes)
+                    if (textTarget != sel) {
+                        textBefore = new ElementSnapshot(sel);
+                        textTarget = sel;
+                    }
                     sel.text = textField.getText();
                     canvas.repaint();
                 }
@@ -151,6 +194,12 @@ public class Toolbox extends JPanel {
             public void insertUpdate(DocumentEvent e) { update(); }
             public void removeUpdate(DocumentEvent e) { update(); }
             public void changedUpdate(DocumentEvent e) { update(); }
+        });
+        textField.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusLost(FocusEvent e) {
+                commitTextEdit();
+            }
         });
         section.add(textField);
 
@@ -166,8 +215,10 @@ public class Toolbox extends JPanel {
         fontSpinner.addChangeListener(e -> {
             CardElement sel = canvas.getSelectedElement();
             if (sel != null && sel.type == CardElementType.TEXT) {
-                sel.fontSize = (int) fontSpinner.getValue();
-                canvas.repaint();
+                recordAndApply(sel, () -> {
+                    sel.fontSize = (int) fontSpinner.getValue();
+                    canvas.repaint();
+                });
             }
         });
         section.add(fontSpinner);
@@ -203,6 +254,7 @@ public class Toolbox extends JPanel {
             CardElement el = new CardElement(type, 50 + offset, 50 + offset, w, h);
             model.addCardElement(cardID, el);
             canvas.addElement(el);
+            actions.record(new AddedElementRecord(model, canvas, cardID, el));
         });
         section.add(btn);
     }
@@ -223,8 +275,10 @@ public class Toolbox extends JPanel {
         rotationSpinner.addChangeListener(e -> {
             CardElement sel = canvas.getSelectedElement();
             if (sel != null) {
-                sel.rotation = (int) rotationSpinner.getValue();
-                canvas.repaint();
+                recordAndApply(sel, () -> {
+                    sel.rotation = (int) rotationSpinner.getValue();
+                    canvas.repaint();
+                });
             }
         });
         section.add(rotationSpinner);
@@ -279,8 +333,10 @@ public class Toolbox extends JPanel {
                 SoundPlayer.playClick();
                 CardElement sel = canvas.getSelectedElement();
                 if (sel != null && appliesTo.test(sel)) {
-                    sel.setColor(c);
-                    canvas.repaint();
+                    recordAndApply(sel, () -> {
+                        sel.setColor(c);
+                        canvas.repaint();
+                    });
                 }
             });
             colorGrid.add(swatch);
@@ -330,6 +386,7 @@ public class Toolbox extends JPanel {
                         el.zLayer = canvas.getElements().size();
                         model.addCardElement(cardID, el);
                         canvas.addElement(el);
+                        actions.record(new AddedElementRecord(model, canvas, cardID, el));
                     }
                 } catch (Exception ex) {
                     System.out.println("Error importing image: " + ex);
@@ -356,8 +413,10 @@ public class Toolbox extends JPanel {
         layerSpinner.addChangeListener(e -> {
             CardElement sel = canvas.getSelectedElement();
             if (sel != null) {
-                sel.zLayer = (int) layerSpinner.getValue();
-                canvas.repaint();
+                recordAndApply(sel, () -> {
+                    sel.zLayer = (int) layerSpinner.getValue();
+                    canvas.repaint();
+                });
             }
         });
         section.add(layerSpinner);

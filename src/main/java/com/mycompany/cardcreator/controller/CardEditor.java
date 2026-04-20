@@ -11,6 +11,7 @@ import javax.swing.*;
 import com.mycompany.cardcreator.model.Card;
 import com.mycompany.cardcreator.model.CardElement;
 import com.mycompany.cardcreator.model.Model;
+import com.mycompany.cardcreator.util.ActionsManager;
 import com.mycompany.cardcreator.util.SoundPlayer;
 import com.mycompany.cardcreator.view.CardCanvas;
 import com.mycompany.cardcreator.view.EditorMenuBar;
@@ -24,8 +25,12 @@ public class CardEditor {
 
         Card card = model.getCard(cardID);
 
+        // session undo/redo. fresh instance each time the editor opens,
+        // so starting a new editor never shows edits from a previous session
+        ActionsManager actions = new ActionsManager();
+
         // CANVAS
-        CardCanvas canvas = new CardCanvas(model, cardID, model.getPageWidth(), model.getPageHeight());
+        CardCanvas canvas = new CardCanvas(model, cardID, model.getPageWidth(), model.getPageHeight(), actions);
         screen.add(canvas, BorderLayout.CENTER);
 
         // LOAD EXISTING ELEMENTS FOR THIS CARD
@@ -37,7 +42,7 @@ public class CardEditor {
         }
 
         // TOOLBOX
-        Toolbox toolbox = new Toolbox(model, cardID, canvas);
+        Toolbox toolbox = new Toolbox(model, cardID, canvas, actions);
         JScrollPane toolboxScroll = new JScrollPane(toolbox);
         toolboxScroll.setBorder(null);
         toolboxScroll.getVerticalScrollBar().setUnitIncrement(16);
@@ -51,7 +56,7 @@ public class CardEditor {
         restoreImage(model, canvas);
 
         // MENU BAR
-        frame.setJMenuBar(new EditorMenuBar(model, cardID, canvas, frame, onBack));
+        frame.setJMenuBar(new EditorMenuBar(model, cardID, canvas, frame, onBack, actions));
         frame.revalidate();
     }
 

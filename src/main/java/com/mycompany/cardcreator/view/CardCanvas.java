@@ -13,6 +13,9 @@ import java.util.UUID;
 import com.mycompany.cardcreator.model.CardElement;
 import com.mycompany.cardcreator.model.CardElementType;
 import com.mycompany.cardcreator.model.Model;
+import com.mycompany.cardcreator.util.ActionsManager;
+import com.mycompany.cardcreator.util.DeletedElementRecord;
+import com.mycompany.cardcreator.util.ElementSnapshot;
 
 /**
  * Canvas panel that displays a card with a grid overlay.
@@ -22,12 +25,19 @@ public class CardCanvas extends JPanel {
 
     private Model model;
     private UUID cardID;
+    private ActionsManager actions;
 
     private BufferedImage backgroundImage;
     private int canvasWidth;
     private int canvasHeight;
     private static final int GRID_SIZE = 25;
     private static final int HANDLE_SIZE = 10;
+
+    // snapshot of the element at the moment a drag/resize gesture started.
+    // committed to ActionsManager on mouseReleased so the whole gesture is one
+    // undo step. null when no gesture is in progress
+    private ElementSnapshot gestureBefore = null;
+    private CardElement gestureElement = null;
 
     // background image position on canvas
     private int imgX = 0;
@@ -103,13 +113,14 @@ public class CardCanvas extends JPanel {
     }
 
 
-    public CardCanvas(Model model, UUID cardID, int canvasWidth, int canvasHeight) {
+    public CardCanvas(Model model, UUID cardID, int canvasWidth, int canvasHeight, ActionsManager actions) {
         this.model = model;
         this.cardID = cardID;
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
         this.imgW = canvasWidth;
         this.imgH = canvasHeight;
+        this.actions = actions;
         setBackground(Color.WHITE);
 
         addMouseListener(new MouseAdapter() {
@@ -130,6 +141,10 @@ public class CardCanvas extends JPanel {
                     if (corner >= 0) {
                         resizingElement = true;
                         elementResizeCorner = corner;
+                        // capture starting state so mouseReleased can record
+                        // the whole resize gesture as one undo step
+                        gestureElement = selectedElement;
+                        gestureBefore = new ElementSnapshot(selectedElement);
                         return;
                     }
                 }
@@ -144,6 +159,9 @@ public class CardCanvas extends JPanel {
                         draggingElement = true;
                         elementDragOffsetX = mx - el.x;
                         elementDragOffsetY = my - el.y;
+                        // capture starting state for undo
+                        gestureElement = el;
+                        gestureBefore = new ElementSnapshot(el);
                         repaint();
                         return;
                     }
@@ -175,11 +193,14 @@ public class CardCanvas extends JPanel {
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                boolean endedGesture = false;
+
                 // snap element to grid on release
                 if (draggingElement && selectedElement != null) {
                     selectedElement.x = snapToGrid(selectedElement.x);
                     selectedElement.y = snapToGrid(selectedElement.y);
                     draggingElement = false;
+                    endedGesture = true;
                     repaint();
                 }
                 if (resizingElement && selectedElement != null) {
@@ -189,8 +210,18 @@ public class CardCanvas extends JPanel {
                     selectedElement.height = Math.max(GRID_SIZE, snapToGrid(selectedElement.height));
                     resizingElement = false;
                     elementResizeCorner = -1;
+                    endedGesture = true;
                     repaint();
                 }
+
+                // commit the drag/resize to the undo stack. recordChange drops
+                // no change internally so a click-without-drag won't clutter undos
+                if (endedGesture && gestureElement != null && gestureBefore != null) {
+                    actions.recordChange(gestureElement, CardCanvas.this,
+                        gestureBefore, new ElementSnapshot(gestureElement));
+                }
+                gestureElement = null;
+                gestureBefore = null;
 
                 // snap background image to grid
                 if (dragging) {
@@ -303,6 +334,9 @@ public class CardCanvas extends JPanel {
 
                 JMenuItem deleteItem = new JMenuItem("Delete");
                 deleteItem.addActionListener(a -> {
+                    // record first so the DeletedElementRecord still has the
+                    // model/canvas linkage it needs for redo
+                    actions.record(new DeletedElementRecord(model, CardCanvas.this, cardID, el));
                     elements.remove(el);
                     if (el.id != null) {
                         model.removeCardElement(cardID, el.id);
@@ -319,7 +353,9 @@ public class CardCanvas extends JPanel {
                 if (el.type != CardElementType.TEXT && el.type != CardElementType.IMAGE) {
                     JMenuItem fillItem = new JMenuItem(el.filled ? "Unfill" : "Fill");
                     fillItem.addActionListener(a -> {
+                        ElementSnapshot before = new ElementSnapshot(el);
                         el.filled = !el.filled;
+                        actions.recordChange(el, CardCanvas.this, before, new ElementSnapshot(el));
                         repaint();
                     });
                     popup.add(fillItem);

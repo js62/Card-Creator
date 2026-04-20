@@ -135,6 +135,21 @@ public class Model {
         }
     }
 
+    // puts a previously-removed element back into the project with its existing
+    // uuid. used by the undo system so other pending records that reference
+    // this element keep pointing at the right thing. if the element is already
+    // present (double restore) 
+    public void restoreCardElement(UUID cardID, CardElement element) {
+        if (element.id == null) return;
+        if (cardElements.containsKey(element.id)) return;
+
+        cardElements.put(element.id, element);
+        Card card = cards.get(cardID);
+        if (card != null) {
+            card.addElementID(element.id);
+        }
+    }
+
     public LinkedHashMap<UUID, CardElement> getCardElements() {
         return cardElements;
     }
