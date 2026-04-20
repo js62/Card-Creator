@@ -7,7 +7,16 @@ import javax.swing.*;
 import com.mycompany.cardcreator.model.FileIO;
 import com.mycompany.cardcreator.model.Model;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
+
 public class EditorMenuBar extends JMenuBar {
+
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+    private final JLabel lastSavedLabel = new JLabel("Last saved: --:--:--");
+
 
     public EditorMenuBar(Model model, UUID cardID, CardCanvas canvas, JFrame frame, Runnable onBack) {
         JMenu fileMenu = new JMenu("File");
@@ -39,6 +48,7 @@ public class EditorMenuBar extends JMenuBar {
             model.setImgW(canvas.getImgW());
             model.setImgH(canvas.getImgH());
             FileIO.saveModel(model);
+            updateLastSaved();
             JOptionPane.showMessageDialog(frame, "Project saved.");
         });
 
@@ -77,6 +87,14 @@ public class EditorMenuBar extends JMenuBar {
         fileMenu.add(backItem);
         fileMenu.add(saveItem);
         fileMenu.add(exportItem);
+
         add(fileMenu);
+        add(Box.createHorizontalStrut(10));
+        add(lastSavedLabel);
+    }
+
+
+    public void updateLastSaved() {
+        lastSavedLabel.setText("Last saved: " + LocalTime.now().format(TIME_FORMAT));
     }
 }

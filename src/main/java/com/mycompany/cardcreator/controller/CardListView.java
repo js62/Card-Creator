@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import com.mycompany.cardcreator.model.Model;
 import com.mycompany.cardcreator.model.FileIO;
+import com.mycompany.cardcreator.view.EditorMenuBar;
 
 /**
  * Main editor window. Shows all cards in a project and lets
@@ -31,8 +32,12 @@ public class CardListView {
     }
     
     
-    private void autoSave(){
+    private void autoSave() {
         FileIO.saveModel(model);
+
+        if (frame != null && frame.getJMenuBar() instanceof EditorMenuBar) {
+            ((EditorMenuBar) frame.getJMenuBar()).updateLastSaved();
+        }
     }
 
     private void OpenWindow() {
