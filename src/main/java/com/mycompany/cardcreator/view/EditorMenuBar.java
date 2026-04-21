@@ -1,7 +1,5 @@
 package com.mycompany.cardcreator.view;
 
-import java.awt.Toolkit;
-import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Path;
@@ -31,9 +29,6 @@ public class EditorMenuBar extends JMenuBar {
         this.model = model;
         this.cardID = cardID;
         this.canvas = canvas;
-
-        // platform-correct so Cmd+Z works on mac, Ctrl+Z windows obvi
-        int menuMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
 
         JMenu fileMenu = new JMenu("File");
 
@@ -98,18 +93,21 @@ public class EditorMenuBar extends JMenuBar {
         fileMenu.add(saveItem);
         fileMenu.add(exportItem);
 
-        // EDIT MENU -- undo / redo. no accelerators set so the menu items
-        // stay clean; the shortcuts are wired at the frame level below
+        // EDIT MENU -- undo / redo, menu-only. moving focus to the canvas
+        // first forces any pending text edit to commit via focusLost so the
+        // in-progress change lands on the stack before we pop it
         JMenu editMenu = new JMenu("Edit");
 
         JMenuItem undoItem = new JMenuItem("Undo");
         undoItem.addActionListener(e -> {
+            canvas.requestFocusInWindow();
             actions.undo();
             canvas.repaint();
         });
 
         JMenuItem redoItem = new JMenuItem("Redo");
         redoItem.addActionListener(e -> {
+            canvas.requestFocusInWindow();
             actions.redo();
             canvas.repaint();
         });
@@ -121,28 +119,6 @@ public class EditorMenuBar extends JMenuBar {
         add(editMenu);
         add(Box.createHorizontalStrut(10));
         add(lastSavedLabel);
-
-        
-        // ctrl+z = undo. ctrl+x = redo
-        JRootPane rootPane = frame.getRootPane();
-        KeyStroke undoKey = KeyStroke.getKeyStroke(KeyEvent.VK_Z, menuMask);
-        KeyStroke redoKey = KeyStroke.getKeyStroke(KeyEvent.VK_X, menuMask);
-        rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(undoKey, "undo");
-        rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(redoKey, "redo");
-        rootPane.getActionMap().put("undo", new AbstractAction() {
-            @Override
-            public void actionPerformed(java.awt.event.ActionEvent e) {
-                actions.undo();
-                canvas.repaint();
-            }
-        });
-        rootPane.getActionMap().put("redo", new AbstractAction() {
-            @Override
-            public void actionPerformed(java.awt.event.ActionEvent e) {
-                actions.redo();
-                canvas.repaint();
-            }
-        });
     }
 
 

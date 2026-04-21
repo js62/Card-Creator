@@ -48,8 +48,11 @@ public class InstructionsPanel extends JPanel {
 
         "7.) EXPORT\n" +
         "    - File -> Export Card\n\n" +
-        "8.) REDO - Ctrl+ Y\n" +
-        "9.) UNDO - Ctrl+ Z"
+        "8.) UNDO / REDO\n" +
+        "    - Edit -> Undo\n" +
+        "    - Edit -> Redo\n" +
+        "    *NOTE : Layer changes are\n" +
+        "     not yet tracked by undo/redo"
         );
 
         JScrollPane scroll = new JScrollPane(textArea);
