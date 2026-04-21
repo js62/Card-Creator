@@ -17,8 +17,18 @@ import com.mycompany.cardcreator.model.FileIO;
 import com.mycompany.cardcreator.controller.CardListView;
 import com.mycompany.cardcreator.util.SoundPlayer;
 
+/**
+ * First window shown when the app starts.
+ *
+ * Gives the user two choices: create a brand new project in an empty
+ * folder, or open an existing project folder. When the user picks one,
+ * this window closes and CardListView takes over.
+ */
 public class ProjectOpener {
 
+    /**
+     * Builds and shows the open-project window.
+     */
     public ProjectOpener() {
 
         JFrame frame = new JFrame("Open Project");
@@ -79,7 +89,7 @@ public class ProjectOpener {
 
         int result = chooser.showOpenDialog(null);
         if (result == JFileChooser.APPROVE_OPTION) {
-            // bridge from Swing's File API to nio Path at this boundary
+            // bridge from Swing's File API to nio Path 
             File selectedFile = chooser.getSelectedFile();
             Path selectedFolder = selectedFile.toPath();
 

@@ -6,30 +6,55 @@ import com.mycompany.cardcreator.model.CardElement;
 import com.mycompany.cardcreator.view.CardCanvas;
 
 /**
- * Session-scoped undo/redo stack for the card editor.  fresh slate each
- * time the editor opens so yesterday's edits never show up in today's session.
+ * Undo and redo stacks for the card editor.
  *
- * Mutations on the same element merge into a single undo step when they
- * happen within MERGE_WINDOW_MS of each other -- lets holding a spinner
- * arrow or clicking through palette swatches count as one action.
+ * An ActionsManager keeps two stacks: a list of things that can be undone
+ * and a list of things that can be redone. A fresh ActionsManager is made
+ * each time the editor opens, so edits from yesterday never show up in
+ * today's session.
+ *
+ * Changes that happen to the same element inside a short window merge
+ * into one undo step, so holding a spinner arrow or clicking through
+ * several palette swatches counts as one action instead of dozens.
  */
 public class ActionsManager {
 
+    /** Changes on the same element within this many milliseconds merge. */
     private static final long MERGE_WINDOW_MS = 800;
 
     private final Deque<ElementRecord> undoStack = new ArrayDeque<>();
     private final Deque<ElementRecord> redoStack = new ArrayDeque<>();
 
-    // push for adds/deletes. user-initiated action so wipe redo stack
+    /**
+     * Pushes an add or delete onto the undo stack.
+     *
+     * The redo stack is cleared because a user action has just happened,
+     * so any "future" that was in the redo stack is no longer reachable.
+     *
+     * @param r the record to push
+     */
     public void record(ElementRecord r) {
         undoStack.push(r);
         redoStack.clear();
     }
 
-    // push for mutations, with merge. if the top of the undo stack is a
-    // ChangedElementRecord for the same element within the window, we extend
-    // it instead of pushing a new record. a no action change (before==after) is
-    // dropped entirely
+    /**
+     * Pushes a change onto the undo stack, merging when it makes sense.
+     *
+     * If the top of the undo stack is already a ChangedElementRecord for
+     * the same element and the previous update was less than the merge
+     * window ago, the existing record's after state is bumped forward
+     * instead of a new record being pushed. A change where before equals
+     * after is dropped entirely.
+     *
+     * The redo stack is cleared on every call because a user action has
+     * just happened.
+     *
+     * @param el      the element being changed
+     * @param canvas  the CardCanvas to repaint on undo and redo
+     * @param before  the element's state before the change
+     * @param after   the element's state after the change
+     */
     public void recordChange(CardElement el, CardCanvas canvas,
                              ElementSnapshot before, ElementSnapshot after) {
         if (before.equalsState(after)) {
@@ -50,6 +75,12 @@ public class ActionsManager {
         redoStack.clear();
     }
 
+    /**
+     * Pops the top record off the undo stack, undoes it, and pushes it
+     * onto the redo stack.
+     *
+     * Does nothing when there is no record to undo.
+     */
     public void undo() {
         if (undoStack.isEmpty()) return;
         ElementRecord r = undoStack.pop();
@@ -57,6 +88,12 @@ public class ActionsManager {
         redoStack.push(r);
     }
 
+    /**
+     * Pops the top record off the redo stack, redoes it, and pushes it
+     * back onto the undo stack.
+     *
+     * Does nothing when there is no record to redo.
+     */
     public void redo() {
         if (redoStack.isEmpty()) return;
         ElementRecord r = redoStack.pop();
@@ -64,10 +101,20 @@ public class ActionsManager {
         undoStack.push(r);
     }
 
+    /**
+     * Returns true when at least one action can be undone.
+     *
+     * @return true if the undo stack has anything on it
+     */
     public boolean canUndo(){
         return !undoStack.isEmpty();
     }
 
+    /**
+     * Returns true when at least one action can be redone.
+     *
+     * @return true if the redo stack has anything on it
+     */
     public boolean canRedo() {
         return !redoStack.isEmpty();
     }

@@ -22,6 +22,16 @@ import com.mycompany.cardcreator.util.AddedElementRecord;
 import com.mycompany.cardcreator.util.ElementSnapshot;
 import com.mycompany.cardcreator.util.SoundPlayer;
 
+/**
+ * Left side panel of the editor that shows the tools for the selected
+ * element.
+ *
+ * The Toolbox owns all the input widgets: Add Text, text field, font size,
+ * text color, Rectangle and Circle buttons, rotation spinner, shape
+ * color, Import Image, and layer spinner. When an element gets selected
+ * on the canvas, the Toolbox updates its own widgets to match the
+ * element's current state.
+ */
 public class Toolbox extends JPanel {
 
     private Model model;
@@ -51,6 +61,14 @@ public class Toolbox extends JPanel {
         new Color(255, 192, 203), new Color(255, 215, 0)
     };
 
+    /**
+     * Builds the toolbox for editing the given card.
+     *
+     * @param model   the project Model being edited
+     * @param cardID  id of the card currently open
+     * @param canvas  the CardCanvas the tools target
+     * @param actions the undo and redo stack for this editing session
+     */
     public Toolbox(Model model, UUID cardID, CardCanvas canvas, ActionsManager actions) {
         this.model = model;
         this.cardID = cardID;

@@ -2,19 +2,44 @@ package com.mycompany.cardcreator.util;
 
 import com.mycompany.cardcreator.model.CardElement;
 
-// frozen copy of every user-editable field on a CardElement.
-// used by ChangedElementRecord to restore state on undo/redo.
+/**
+ * Frozen copy of every editable field on a CardElement.
+ *
+ * Used by ChangedElementRecord to put state back the way it was on undo
+ * and the way it was on redo. Two snapshots of the same state compare
+ * equal through equalsState.
+ */
 public class ElementSnapshot {
 
+    /** Position and size copied from the element. */
     public final int x, y, width, height;
+
+    /** Text content copied from the element. */
     public final String text;
+
+    /** Font size copied from the element. */
     public final int fontSize;
+
+    /** Color as "#rrggbb", copied from the element. */
     public final String colorHex;
+
+    /** Fill flag copied from the element. */
     public final boolean filled;
+
+    /** Rotation in degrees, copied from the element. */
     public final double rotation;
+
+    /** Image path copied from the element. */
     public final String imagePath;
+
+    /** Layer ordering copied from the element. */
     public final int zLayer;
 
+    /**
+     * Captures every editable field on the given element.
+     *
+     * @param el the element to snapshot; must not be null
+     */
     public ElementSnapshot(CardElement el) {
         this.x=el.x;
         this.y=el.y;
@@ -29,6 +54,13 @@ public class ElementSnapshot {
         this.zLayer=el.zLayer;
     }
 
+    /**
+     * Writes every field on this snapshot back onto the given element.
+     *
+     * Used by the undo system to put an element back the way it was.
+     *
+     * @param el the element to write into
+     */
     public void applyTo(CardElement el) {
         el.x=x;
         el.y=y;
@@ -43,9 +75,16 @@ public class ElementSnapshot {
         el.zLayer = zLayer;
     }
 
-    // true when nothing actually changed between two snapshots,lets callers
-    // skip recording no change mutations (mousePressed then mouseReleased
-    // without any drag in between)
+    /**
+     * Returns true when this snapshot matches the other field for field.
+     *
+     * ActionsManager uses this to drop no change mutations: if the user
+     * pressed then released the mouse without moving, the before and
+     * after snapshots match and nothing needs to be saved.
+     *
+     * @param other the snapshot to compare against
+     * @return true if every field matches
+     */
     public boolean equalsState(ElementSnapshot other) {
         return x==other.x
             && y == other.y

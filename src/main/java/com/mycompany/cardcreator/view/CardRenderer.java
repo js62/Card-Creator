@@ -15,18 +15,40 @@ import java.util.Map;
 import com.mycompany.cardcreator.model.CardElement;
 import com.mycompany.cardcreator.model.Model;
 
-// renders a CardCanvas to screen and to a flat export image. owns the image
-// cache so disk reads are amortized across repaints
+/**
+ * Paints a CardCanvas to screen and to a flat image.
+ *
+ * Owns a small cache of image files so a card with several image
+ * elements does not hit the disk once per repaint. The renderer itself
+ * has no state tied to any one canvas; a single instance can paint any
+ * CardCanvas.
+ */
 public class CardRenderer {
 
     private final Model model;
     private final Map<String, BufferedImage> imageCache = new HashMap<>();
 
+    /**
+     * Builds a renderer that resolves image paths against the given
+     * model's project folder.
+     *
+     * @param model the project Model whose folder is the base for
+     *              relative image paths
+     */
     public CardRenderer(Model model) {
         this.model = model;
     }
 
-    // draws the interactive canvas (grid + selection handles) into the panel
+    /**
+     * Draws the given canvas into the Graphics supplied by Swing.
+     *
+     * Shows the grid, the background image, every element sorted by
+     * layer, a card border, and selection handles around the selected
+     * element.
+     *
+     * @param g      the Graphics context supplied by Swing
+     * @param canvas the CardCanvas to paint
+     */
     public void paint(Graphics g, CardCanvas canvas) {
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -63,7 +85,16 @@ public class CardRenderer {
         g2.dispose();
     }
 
-    // renders a flat image (no grid, no handles) for export / thumbnails
+    /**
+     * Renders the given canvas to a flat BufferedImage.
+     *
+     * The grid overlay, selection handles, and card border are left out
+     * so the output is suitable for Export and for the thumbnails shown
+     * on the card list.
+     *
+     * @param canvas the CardCanvas to render
+     * @return a freshly allocated BufferedImage sized to the card
+     */
     public BufferedImage exportAsImage(CardCanvas canvas) {
         int cw = canvas.getCanvasWidth();
         int ch = canvas.getCanvasHeight();

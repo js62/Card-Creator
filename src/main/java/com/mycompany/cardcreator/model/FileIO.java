@@ -10,11 +10,22 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Handles saving and loading project data to/from json files.
+ * Saves and loads projects as json.
+ *
+ * A project is stored in its own folder, with the data in a file called
+ * data.json. Save writes a copy of the Model; load reads it back and
+ * rebuilds a Model from the saved state.
  */
 public class FileIO {
 
-    // saves the entire model to data.json in the project folder
+    /**
+     * Writes the whole Model to data.json in its project folder.
+     *
+     * A failure to write (disk full, permission denied) is printed to
+     * stdout and swallowed; the caller is not told the save failed.
+     *
+     * @param model the Model to save; must have a project folder set
+     */
     public static void saveModel(Model model) {
         Path dataFile = model.getFolder().resolve("data.json");
         SavableModel m = new SavableModel(model);
@@ -28,8 +39,14 @@ public class FileIO {
     }
 
     /**
-     * Loads a Model from the data.json in the given folder.
-     * Returns null if file doesnt exist or cant be read.
+     * Loads a Model from data.json in the given folder.
+     *
+     * Returns null if the file is missing or cannot be read. A returned
+     * Model already has its folder set and every card and element put
+     * back under the ids they had when saved.
+     *
+     * @param projectFolder the project folder to read from
+     * @return the loaded Model, or null on failure
      */
     public static Model loadModel(Path projectFolder) {
         Path dataFile = projectFolder.resolve("data.json");
@@ -81,7 +98,14 @@ public class FileIO {
         }
     }
 
-    // creates a brand new empty project
+    /**
+     * Creates a brand new empty project in the given folder.
+     *
+     * A fresh Model is made with that folder as its root and then saved
+     * straight away, so data.json exists before the user opens the editor.
+     *
+     * @param projectFolder the empty folder to put the project in
+     */
     public static void createProject(Path projectFolder) {
         Model model = new Model();
         model.setFolder(projectFolder);
@@ -92,6 +116,12 @@ public class FileIO {
 
 // wrapper classes for gson serialization below
 
+/**
+ * Plain fields copy of CardElement used when reading and writing json.
+ *
+ * Kept separate from CardElement so the serialized shape does not change
+ * if CardElement grows helper methods or AWT types.
+ */
 class SavableElement {
     String type;
     int x, y, width, height;
@@ -104,6 +134,12 @@ class SavableElement {
     int zLayer;
 }
 
+/**
+ * Plain fields copy of Card used when reading and writing json.
+ *
+ * The id is stored as a string because gson does not serialize UUID by
+ * default.
+ */
 class SavableCard {
     String id;
     int width;
@@ -111,6 +147,12 @@ class SavableCard {
     List<SavableElement> elements;
 }
 
+/**
+ * Plain fields copy of Model used when reading and writing json.
+ *
+ * Holds everything worth saving: page size, card size, background image,
+ * and every card with its elements.
+ */
 class SavableModel {
 
     String folder;
@@ -122,8 +164,14 @@ class SavableModel {
     int imgX, imgY, imgW, imgH;
     List<SavableCard> cards;
 
+    /** No-arg constructor used by gson on load. */
     public SavableModel() {}
 
+    /**
+     * Copies every saved field out of the given Model into this wrapper.
+     *
+     * @param m the Model being saved
+     */
     public SavableModel(Model m) {
         folder = m.getFolder().toAbsolutePath().toString();
         pageWidth = m.getPageWidth();

@@ -16,9 +16,15 @@ import com.mycompany.cardcreator.util.DeletedElementRecord;
 import com.mycompany.cardcreator.util.ElementSnapshot;
 import com.mycompany.cardcreator.view.CardCanvas;
 
-// routes mouse input on a CardCanvas into selection, drag, resize, and right
-// click actions. each gesture is captured on mousePressed and committed to
-// the ActionsManager on mouseReleased so one gesture == one undo step
+/**
+ * Mouse handler for a CardCanvas.
+ *
+ * Listens for clicks and drags on the canvas and turns them into
+ * selection, drag, resize, and right click actions. The start of each
+ * gesture is remembered on mousePressed and pushed onto the
+ * ActionsManager on mouseReleased, so one drag or resize is one undo
+ * step.
+ */
 public class CanvasMouseController extends MouseAdapter {
 
     private final CardCanvas canvas;
@@ -41,25 +47,43 @@ public class CanvasMouseController extends MouseAdapter {
     // background image resize state
     private boolean resizing = false;
     private int resizeCorner = -1;
-    private float aspectRatio = 1f;
+    private float aspectRatio =1f;
 
     // snapshot of the background image geometry when a gesture started
     private int bgBeforeX, bgBeforeY, bgBeforeW, bgBeforeH;
     private boolean bgGestureActive = false;
 
+    /**
+     * Builds a mouse controller that listens on one canvas.
+     *
+     * @param canvas  the CardCanvas to listen on
+     * @param model   the project Model, used for deleting elements
+     * @param cardID  id of the card being edited
+     * @param actions the undo and redo stack for this editing session
+     */
     public CanvasMouseController(CardCanvas canvas, Model model, UUID cardID, ActionsManager actions) {
-        this.canvas = canvas;
-        this.model = model;
-        this.cardID = cardID;
-        this.actions = actions;
+        this.canvas=canvas;
+        this.model=model;
+        this.cardID=cardID;
+        this.actions=actions;
     }
 
+    /**
+     * Handles a mouse button press on the canvas.
+     *
+     * Right clicks open the context menu. Left clicks either grab a
+     * resize handle on the selected element, start dragging whichever
+     * element is under the cursor, or start dragging or resizing the
+     * background image when nothing else is hit.
+     *
+     * @param e the incoming MouseEvent
+     */
     @Override
     public void mousePressed(MouseEvent e) {
         int mx = canvas.toCardX(e.getX());
         int my = canvas.toCardY(e.getY());
 
-        if (SwingUtilities.isRightMouseButton(e)) {
+        if (SwingUtilities.isRightMouseButton(e)){
             handleRightClick(e, mx, my);
             return;
         }
@@ -79,7 +103,8 @@ public class CanvasMouseController extends MouseAdapter {
 
         // click inside any element (iterate top to bottom)
         var elements = canvas.getElements();
-        for (int i = elements.size() - 1; i >= 0; i--) {
+        for (int i = elements.size() - 1; i >= 0; i--)
+        {
             CardElement el = elements.get(i);
             if (mx >= el.x && mx <= el.x + el.width
                     && my >= el.y && my <= el.y + el.height) {
@@ -116,6 +141,15 @@ public class CanvasMouseController extends MouseAdapter {
         }
     }
 
+    /**
+     * Handles a mouse button release on the canvas.
+     *
+     * Snaps the element or background image to the grid, pushes the
+     * gesture onto the undo stack as a single step, and clears the
+     * gesture state.
+     *
+     * @param e the incoming MouseEvent
+     */
     @Override
     public void mouseReleased(MouseEvent e) {
         boolean endedGesture = false;
@@ -173,6 +207,15 @@ public class CanvasMouseController extends MouseAdapter {
         bgGestureActive = false;
     }
 
+    /**
+     * Handles a mouse drag on the canvas.
+     *
+     * Moves the element being dragged, resizes the element whose handle
+     * was grabbed, or moves or resizes the background image, depending
+     * on what mousePressed started.
+     *
+     * @param e the incoming MouseEvent
+     */
     @Override
     public void mouseDragged(MouseEvent e) {
         int mx = canvas.toCardX(e.getX());
@@ -194,6 +237,14 @@ public class CanvasMouseController extends MouseAdapter {
         }
     }
 
+    /**
+     * Handles mouse movement over the canvas with no button pressed.
+     *
+     * Updates the cursor so the user can tell whether the pointer is on
+     * a resize handle, over a movable element, or over empty space.
+     *
+     * @param e the incoming MouseEvent
+     */
     @Override
     public void mouseMoved(MouseEvent e) {
         int mx = canvas.toCardX(e.getX());
@@ -244,6 +295,7 @@ public class CanvasMouseController extends MouseAdapter {
         var elements = canvas.getElements();
         for (int i = elements.size() - 1; i >= 0; i--) {
             CardElement el = elements.get(i);
+            
             if (mx >= el.x && mx <= el.x + el.width
                     && my >= el.y && my <= el.y + el.height) {
                 canvas.setSelectedElement(el);
@@ -252,6 +304,7 @@ public class CanvasMouseController extends MouseAdapter {
 
                 JMenuItem deleteItem = new JMenuItem("Delete");
                 deleteItem.addActionListener(a -> {
+                    
                     // record first so the DeletedElementRecord still has the
                     // model/canvas linkage it needs for redo
                     actions.record(new DeletedElementRecord(model, canvas, cardID, el));

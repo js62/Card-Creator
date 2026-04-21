@@ -18,8 +18,25 @@ import com.mycompany.cardcreator.view.EditorMenuBar;
 import com.mycompany.cardcreator.view.InstructionsPanel;
 import com.mycompany.cardcreator.view.Toolbox;
 
+/**
+ * Wires up one editing session for a single card.
+ *
+ * Builds the canvas, the toolbox, the instructions panel, and the menu
+ * bar, then drops them into the given screen panel. Existing elements
+ * for the card are loaded from the Model and a saved background image
+ * is put back at its saved geometry.
+ */
 public class CardEditor {
 
+    /**
+     * Opens the editor for one card inside the given screen panel.
+     *
+     * @param model   the project Model being edited
+     * @param cardID  id of the card to open
+     * @param screen  the panel the editor widgets are added to
+     * @param frame   the top level JFrame, used for the menu bar
+     * @param onBack  callback fired when the user clicks Back on the menu
+     */
     public CardEditor(Model model, UUID cardID, JPanel screen, JFrame frame, Runnable onBack) {
         SoundPlayer.playSound("Sounds/EditorLoadSound.wav");
 

@@ -14,10 +14,19 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 
+/**
+ * Menu bar shown at the top of the editor window.
+ *
+ * Holds the File menu (Back, Save, Export) and the Edit menu (Undo,
+ * Redo), plus a small "last saved" label on the right that gets updated
+ * whenever the project is saved.
+ */
 public class EditorMenuBar extends JMenuBar {
 
+    /** Time format used in the "last saved" label. */
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
 
+    /** Readout on the right of the bar showing the last save time. */
     private final JLabel lastSavedLabel = new JLabel("Last saved: --:--:--");
 
     private final Model model;
@@ -25,6 +34,16 @@ public class EditorMenuBar extends JMenuBar {
     private final CardCanvas canvas;
 
 
+    /**
+     * Builds the menu bar and wires every menu item up to its action.
+     *
+     * @param model   the project Model being edited
+     * @param cardID  id of the card currently open in the editor
+     * @param canvas  the CardCanvas being edited, used for export and preview
+     * @param frame   the top level JFrame, used for dialogs and file choosers
+     * @param onBack  callback fired when the user clicks Back
+     * @param actions the undo and redo stack for this editing session
+     */
     public EditorMenuBar(Model model, UUID cardID, CardCanvas canvas, JFrame frame, Runnable onBack, ActionsManager actions) {
         this.model = model;
         this.cardID = cardID;
@@ -122,13 +141,25 @@ public class EditorMenuBar extends JMenuBar {
     }
 
 
+    /**
+     * Updates the "last saved" label to the current time.
+     *
+     * Called by the save menu item and by CardListView's autosave timer
+     * so the user can see how fresh the save on disk is.
+     */
     public void updateLastSaved() {
         lastSavedLabel.setText("Last saved: " + LocalTime.now().format(TIME_FORMAT));
     }
 
 
-    // re-renders the current card to a png so the card list thumbnail stays
-    // fresh. called from manual save, back, and the autosave timer
+    /**
+     * Writes a png thumbnail of the current card next to data.json.
+     *
+     * Called from the manual save, from Back, and from the autosave
+     * timer, so the card list on the main window always has a fresh
+     * thumbnail to show. Errors are printed to stdout and the call
+     * returns without throwing.
+     */
     public void saveCardPreview() {
         try {
             BufferedImage preview = canvas.exportAsImage();

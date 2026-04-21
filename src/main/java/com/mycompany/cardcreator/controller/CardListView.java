@@ -15,14 +15,27 @@ import com.mycompany.cardcreator.util.SoundPlayer;
 import com.mycompany.cardcreator.view.EditorMenuBar;
 
 /**
- * Main editor window. Shows all cards in a project and lets
- * you click into each one to edit it.
+ * Main window for a project.
+ *
+ * Loads the project from disk, then shows a grid of buttons (one per
+ * card) and a "+ card" button for adding new ones. Clicking a card
+ * swaps the view out for a CardEditor; clicking Back from the editor
+ * comes back here. An autosave timer writes the project every ten
+ * seconds while this window is open.
  */
 public class CardListView {
 
     private Model model;
     private JFrame frame;
 
+    /**
+     * Opens the project at the given folder and shows the card list.
+     *
+     * If the project cannot be loaded, a dialog is shown and the window
+     * is not opened.
+     *
+     * @param projectFolder the folder the project lives in
+     */
     public CardListView(Path projectFolder) {
         //load project from file
         model = FileIO.loadModel(projectFolder);
@@ -99,7 +112,8 @@ public class CardListView {
                         b.setContentAreaFilled(false);
                         b.setBorderPainted(true);
                     }
-                } catch (Exception ex) {
+                } catch (Exception ex) 
+                {
                     //just keep default text if loading fails
                 }
             }

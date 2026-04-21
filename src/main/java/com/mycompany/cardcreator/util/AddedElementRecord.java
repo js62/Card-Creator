@@ -5,6 +5,13 @@ import com.mycompany.cardcreator.model.CardElement;
 import com.mycompany.cardcreator.model.Model;
 import com.mycompany.cardcreator.view.CardCanvas;
 
+/**
+ * Undo record for "user added this element".
+ *
+ * Undo removes the element from the canvas and the model. Redo puts it
+ * back under the same id so any other record still holding the element
+ * keeps working.
+ */
 public class AddedElementRecord implements ElementRecord {
 
     private final Model model;
@@ -12,6 +19,14 @@ public class AddedElementRecord implements ElementRecord {
     private final UUID cardID;
     private final CardElement element;
 
+    /**
+     * Builds a record tracking that the given element was added.
+     *
+     * @param model   the Model the element belongs to
+     * @param canvas  the CardCanvas the element was added to
+     * @param cardID  id of the card the element is on
+     * @param element the element that was just added
+     */
     public AddedElementRecord(Model model, CardCanvas canvas, UUID cardID, CardElement element){
         this.model = model;
         this.canvas=canvas;
@@ -19,6 +34,9 @@ public class AddedElementRecord implements ElementRecord {
         this.element=element;
     }
 
+    /**
+     * Removes the element from the canvas and the model.
+     */
     @Override
     public void undo() {
         canvas.removeElement(element);
@@ -27,6 +45,10 @@ public class AddedElementRecord implements ElementRecord {
         }
     }
 
+    /**
+     * Puts the element back on the canvas and the model under its
+     * original id.
+     */
     @Override
     public void redo() {
         // restoreCardElement reuses the existing uuid so other records that

@@ -5,8 +5,18 @@ import java.awt.Color;
 import java.awt.Dimension;
 import javax.swing.*;
 
+/**
+ * Right side panel of the editor that shows static help text.
+ *
+ * The text is hard coded because the instructions do not change between
+ * sessions. If new features are added, the text here needs to be updated
+ * too.
+ */
 public class InstructionsPanel extends JPanel {
 
+    /**
+     * Builds the panel and fills it with the how to use text.
+     */
     public InstructionsPanel() {
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(255, 0));
