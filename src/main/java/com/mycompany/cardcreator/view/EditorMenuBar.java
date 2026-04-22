@@ -5,10 +5,9 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.UUID;
 import javax.swing.*;
+import com.mycompany.cardcreator.model.ActionsManager;
 import com.mycompany.cardcreator.model.FileIO;
 import com.mycompany.cardcreator.model.Model;
-import com.mycompany.cardcreator.util.ActionsManager;
-import com.mycompany.cardcreator.util.SoundPlayer;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -66,10 +65,6 @@ public class EditorMenuBar extends JMenuBar {
         JMenuItem saveItem = new JMenuItem("Save");
         saveItem.addActionListener(e -> {
             SoundPlayer.playClick();
-            model.setImgX(canvas.getImgX());
-            model.setImgY(canvas.getImgY());
-            model.setImgW(canvas.getImgW());
-            model.setImgH(canvas.getImgH());
             FileIO.saveModel(model);
             saveCardPreview();
             updateLastSaved();

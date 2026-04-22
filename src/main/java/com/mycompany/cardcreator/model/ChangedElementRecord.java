@@ -1,7 +1,4 @@
-package com.mycompany.cardcreator.util;
-
-import com.mycompany.cardcreator.model.CardElement;
-import com.mycompany.cardcreator.view.CardCanvas;
+package com.mycompany.cardcreator.model;
 
 /**
  * Undo record for "user changed an element".
@@ -15,7 +12,7 @@ import com.mycompany.cardcreator.view.CardCanvas;
 public class ChangedElementRecord implements ElementRecord {
 
     private final CardElement element;
-    private final CardCanvas canvas;
+    private final CanvasView canvas;
     private final ElementSnapshot before;
     private ElementSnapshot after;
     private long lastUpdatedMillis;
@@ -24,11 +21,11 @@ public class ChangedElementRecord implements ElementRecord {
      * Builds a record tracking a change to the given element.
      *
      * @param element the element that was changed
-     * @param canvas  the CardCanvas the element is on, repainted on undo and redo
+     * @param canvas  the canvas view the element is on, repainted on undo and redo
      * @param before  the state of the element before the change
      * @param after   the state of the element after the change
      */
-    public ChangedElementRecord(CardElement element, CardCanvas canvas,
+    public ChangedElementRecord(CardElement element, CanvasView canvas,
                                 ElementSnapshot before, ElementSnapshot after){
         this.element =element;
         this.canvas=canvas;

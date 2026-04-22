@@ -60,11 +60,6 @@ public class FileIO {
 
             Model model = new Model();
             model.setFolder(projectFolder);
-            model.setBackgroundImagePath(sm.backgroundImagePath);
-            model.setImgX(sm.imgX);
-            model.setImgY(sm.imgY);
-            model.setImgW(sm.imgW);
-            model.setImgH(sm.imgH);
 
             // rebuild cards and their elements from saved data
             if (sm.cards != null) {
@@ -150,8 +145,8 @@ class SavableCard {
 /**
  * Plain fields copy of Model used when reading and writing json.
  *
- * Holds everything worth saving: page size, card size, background image,
- * and every card with its elements.
+ * Holds everything worth saving: page size, card size, and every card
+ * with its elements.
  */
 class SavableModel {
 
@@ -160,8 +155,6 @@ class SavableModel {
     int pageHeight;
     int cardWidth;
     int cardHeight;
-    String backgroundImagePath;
-    int imgX, imgY, imgW, imgH;
     List<SavableCard> cards;
 
     /** No-arg constructor used by gson on load. */
@@ -178,11 +171,6 @@ class SavableModel {
         pageHeight = m.getPageHeight();
         cardWidth = m.getCardWidth();
         cardHeight = m.getCardHeight();
-        backgroundImagePath = m.getBackgroundImagePath();
-        imgX = m.getImgX();
-        imgY = m.getImgY();
-        imgW = m.getImgW();
-        imgH = m.getImgH();
 
         // serialize each card and its elements
         cards = new ArrayList<>();

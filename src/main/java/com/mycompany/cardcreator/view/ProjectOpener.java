@@ -15,7 +15,6 @@ import javax.swing.JOptionPane;
 
 import com.mycompany.cardcreator.model.FileIO;
 import com.mycompany.cardcreator.controller.CardListView;
-import com.mycompany.cardcreator.util.SoundPlayer;
 
 /**
  * First window shown when the app starts.

@@ -42,9 +42,8 @@ public class CardRenderer {
     /**
      * Draws the given canvas into the Graphics supplied by Swing.
      *
-     * Shows the grid, the background image, every element sorted by
-     * layer, a card border, and selection handles around the selected
-     * element.
+     * Shows the grid, every element sorted by layer, a card border, and
+     * selection handles around the selected element.
      *
      * @param g      the Graphics context supplied by Swing
      * @param canvas the CardCanvas to paint
@@ -60,11 +59,6 @@ public class CardRenderer {
 
         g2.setColor(Color.WHITE);
         g2.fillRect(0, 0, cw, ch);
-
-        BufferedImage bg = canvas.getBackgroundImage();
-        if (bg != null) {
-            g2.drawImage(bg, canvas.getImgX(), canvas.getImgY(), canvas.getImgW(), canvas.getImgH(), null);
-        }
 
         g2.setColor(new Color(200, 200, 200));
         for (int gx = 0; gx <= cw; gx += CardCanvas.GRID_SIZE) {
@@ -105,11 +99,6 @@ public class CardRenderer {
 
         g2.setColor(Color.WHITE);
         g2.fillRect(0, 0, cw, ch);
-
-        BufferedImage bg = canvas.getBackgroundImage();
-        if (bg != null) {
-            g2.drawImage(bg, canvas.getImgX(), canvas.getImgY(), canvas.getImgW(), canvas.getImgH(), null);
-        }
 
         for (CardElement el : sortedByLayer(canvas.getElements())) {
             drawElement(g2, el, false, null);

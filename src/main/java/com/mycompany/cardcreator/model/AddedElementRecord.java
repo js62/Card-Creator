@@ -1,9 +1,6 @@
-package com.mycompany.cardcreator.util;
+package com.mycompany.cardcreator.model;
 
 import java.util.UUID;
-import com.mycompany.cardcreator.model.CardElement;
-import com.mycompany.cardcreator.model.Model;
-import com.mycompany.cardcreator.view.CardCanvas;
 
 /**
  * Undo record for "user added this element".
@@ -15,7 +12,7 @@ import com.mycompany.cardcreator.view.CardCanvas;
 public class AddedElementRecord implements ElementRecord {
 
     private final Model model;
-    private final CardCanvas canvas;
+    private final CanvasView canvas;
     private final UUID cardID;
     private final CardElement element;
 
@@ -23,11 +20,11 @@ public class AddedElementRecord implements ElementRecord {
      * Builds a record tracking that the given element was added.
      *
      * @param model   the Model the element belongs to
-     * @param canvas  the CardCanvas the element was added to
+     * @param canvas  the canvas view the element was added to
      * @param cardID  id of the card the element is on
      * @param element the element that was just added
      */
-    public AddedElementRecord(Model model, CardCanvas canvas, UUID cardID, CardElement element){
+    public AddedElementRecord(Model model, CanvasView canvas, UUID cardID, CardElement element){
         this.model = model;
         this.canvas=canvas;
         this.cardID = cardID;

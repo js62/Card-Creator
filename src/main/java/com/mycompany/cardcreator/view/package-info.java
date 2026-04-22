@@ -9,9 +9,14 @@
  *   Toolbox            left-hand panel with add-text, shapes, colors,
  *                      rotation, layer, and image controls
  *   CardCanvas         the actual drawing surface for a card; holds the
- *                      elements, background image, and selection state
+ *                      elements and selection state
  *   CardRenderer       paints a CardCanvas to screen and to an export image,
  *                      with a small cache so disk reads don't happen every frame
+ *   SoundPlayer        plays UI click and cue sounds from the classpath
+ *
+ * CardCanvas implements model.CanvasView so the undo records in the
+ * model package can tell the view to add, remove, or repaint elements
+ * without importing view.* themselves.
  *
  * Rendering belongs to this package; mouse and keyboard handling belongs to
  * the controller package. These screens read from the model package and

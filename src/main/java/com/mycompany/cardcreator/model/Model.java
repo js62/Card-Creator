@@ -8,10 +8,9 @@ import java.util.UUID;
 /**
  * Holds all the data for one project.
  *
- * A Model knows where the project folder is, how big the pages are, which
- * background image is being used, and every card with the elements on it.
- * Other parts of the app read and change project data by calling methods
- * here.
+ * A Model knows where the project folder is, how big the pages are, and
+ * every card with the elements on it. Other parts of the app read and
+ * change project data by calling methods here.
  */
 public class Model {
 
@@ -33,145 +32,6 @@ public class Model {
     //dimensions for the individual cards
     private int cardWidth = pageHeight / 4;
     private int cardHeight = pageWidth / 4;
-
-    private String backgroundImagePath = null;
-
-    // image position and size on canvas (saved with project)
-    private int imgX = 0;
-    private int imgY = 0;
-    private int imgW = 0;
-    private int imgH = 0;
-
-    /**
-     * Returns the stored background image path string, kept relative to
-     * the project folder. Only FileIO should call this during save. UI
-     * code should call resolveBackgroundImage instead.
-     *
-     * @return the stored path string, or null if no background is set
-     */
-    String getBackgroundImagePath() {
-        return backgroundImagePath;
-    }
-
-    /**
-     * Puts back the stored background image path string. Only FileIO
-     * should call this during load. UI code should call setBackgroundImage.
-     *
-     * @param path the stored path string, or null to clear
-     */
-    void setBackgroundImagePath(String path) {
-        backgroundImagePath = path;
-    }
-
-    /**
-     * Picks a background image for the project.
-     *
-     * If a project folder is set and the given path is absolute, the path
-     * is stored relative to that folder so the project still works when
-     * the folder is copied to another machine. Passing null clears the
-     * background.
-     *
-     * @param imageFile absolute or relative path to the image, or null to clear
-     */
-    public void setBackgroundImage(Path imageFile) {
-        if (imageFile == null) {
-            backgroundImagePath = null;
-            return;
-        }
-        if (projectFolder != null && imageFile.isAbsolute()) {
-            backgroundImagePath = projectFolder.relativize(imageFile).toString();
-        } else {
-            backgroundImagePath = imageFile.toString();
-        }
-    }
-
-    /**
-     * Returns the full path to the background image, or null if none is
-     * set or the project folder is unknown.
-     *
-     * Older saves may hold an absolute path already; those are returned
-     * unchanged.
-     *
-     * @return an absolute Path for the background image, or null
-     */
-    public Path resolveBackgroundImage() {
-        if (backgroundImagePath == null || projectFolder == null) {
-            return null;
-        }
-        return projectFolder.resolve(backgroundImagePath);
-    }
-
-    /**
-     * Returns the saved x position of the background image in card coordinates.
-     *
-     * @return the saved imgX value
-     */
-    public int getImgX() {
-        return imgX;
-    }
-
-    /**
-     * Stores the x position of the background image for the next save.
-     *
-     * @param x x position in card coordinates
-     */
-    public void setImgX(int x) {
-        imgX = x;
-    }
-
-    /**
-     * Returns the saved y position of the background image in card coordinates.
-     *
-     * @return the saved imgY value
-     */
-    public int getImgY() {
-        return imgY;
-    }
-
-    /**
-     * Stores the y position of the background image for the next save.
-     *
-     * @param y y position in card coordinates
-     */
-    public void setImgY(int y) {
-        imgY = y;
-    }
-
-    /**
-     * Returns the saved width of the background image in card coordinates.
-     *
-     * @return the saved imgW value
-     */
-    public int getImgW() {
-        return imgW;
-    }
-
-    /**
-     * Stores the width of the background image for the next save.
-     *
-     * @param w width in card coordinates
-     */
-    public void setImgW(int w) {
-        imgW = w;
-    }
-
-    /**
-     * Returns the saved height of the background image in card coordinates.
-     *
-     * @return the saved imgH value
-     */
-    public int getImgH() {
-        return imgH;
-    }
-
-    /**
-     * Stores the height of the background image for the next save.
-     *
-     * @param h height in card coordinates
-     */
-    public void setImgH(int h) {
-        imgH = h;
-    }
 
 
     // all elements across all cards, keyed by uuid

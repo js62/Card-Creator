@@ -1,9 +1,7 @@
-package com.mycompany.cardcreator.util;
+package com.mycompany.cardcreator.model;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import com.mycompany.cardcreator.model.CardElement;
-import com.mycompany.cardcreator.view.CardCanvas;
 
 /**
  * Undo and redo stacks for the card editor.
@@ -51,11 +49,11 @@ public class ActionsManager {
      * just happened.
      *
      * @param el      the element being changed
-     * @param canvas  the CardCanvas to repaint on undo and redo
+     * @param canvas  the canvas view to repaint on undo and redo
      * @param before  the element's state before the change
      * @param after   the element's state after the change
      */
-    public void recordChange(CardElement el, CardCanvas canvas,
+    public void recordChange(CardElement el, CanvasView canvas,
                              ElementSnapshot before, ElementSnapshot after) {
         if (before.equalsState(after)) {
             return;

@@ -11,8 +11,8 @@ import java.util.UUID;
 
 import com.mycompany.cardcreator.model.Model;
 import com.mycompany.cardcreator.model.FileIO;
-import com.mycompany.cardcreator.util.SoundPlayer;
 import com.mycompany.cardcreator.view.EditorMenuBar;
+import com.mycompany.cardcreator.view.SoundPlayer;
 
 /**
  * Main window for a project.

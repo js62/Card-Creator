@@ -1,6 +1,4 @@
-package com.mycompany.cardcreator.util;
-
-import com.mycompany.cardcreator.model.CardElement;
+package com.mycompany.cardcreator.model;
 
 /**
  * Frozen copy of every editable field on a CardElement.

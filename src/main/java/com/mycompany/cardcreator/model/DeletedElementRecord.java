@@ -1,9 +1,6 @@
-package com.mycompany.cardcreator.util;
+package com.mycompany.cardcreator.model;
 
 import java.util.UUID;
-import com.mycompany.cardcreator.model.CardElement;
-import com.mycompany.cardcreator.model.Model;
-import com.mycompany.cardcreator.view.CardCanvas;
 
 /**
  * Undo record for "user deleted this element".
@@ -14,7 +11,7 @@ import com.mycompany.cardcreator.view.CardCanvas;
 public class DeletedElementRecord implements ElementRecord {
 
     private final Model model;
-    private final CardCanvas canvas;
+    private final CanvasView canvas;
     private final UUID cardID;
     private final CardElement element;
 
@@ -22,11 +19,11 @@ public class DeletedElementRecord implements ElementRecord {
      * Builds a record tracking that the given element was deleted.
      *
      * @param model   the Model the element came from
-     * @param canvas  the CardCanvas the element was on
+     * @param canvas  the canvas view the element was on
      * @param cardID  id of the card the element was on
      * @param element the element that was just deleted; its id must still be set
      */
-    public DeletedElementRecord(Model model, CardCanvas canvas, UUID cardID, CardElement element){
+    public DeletedElementRecord(Model model, CanvasView canvas, UUID cardID, CardElement element){
         this.model=model;
         this.canvas = canvas;
         this.cardID=cardID;

@@ -8,20 +8,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import com.mycompany.cardcreator.controller.CanvasMouseController;
+import com.mycompany.cardcreator.model.ActionsManager;
+import com.mycompany.cardcreator.model.CanvasView;
 import com.mycompany.cardcreator.model.CardElement;
 import com.mycompany.cardcreator.model.Model;
-import com.mycompany.cardcreator.util.ActionsManager;
+
 
 /**
  * The drawing surface inside the editor for one card.
  *
- * A CardCanvas holds the state for a single card: the elements, the
- * selected element, and the background image with its position and size.
- * Painting is handed off to CardRenderer and mouse input is handed off to
- * CanvasMouseController, so this class stays focused on state and on the
- * public methods those two collaborators need.
+ * A CardCanvas holds the state for a single card: the elements and the
+ * selected element. Painting is handed off to CardRenderer and mouse
+ * input is handed off to CanvasMouseController, so this class stays
+ * focused on state and on the public methods those two collaborators
+ * need.
  */
-public class CardCanvas extends JPanel {
+public class CardCanvas extends JPanel implements CanvasView {
 
     /** Grid spacing in card pixels; elements snap to multiples of this on drop. */
     public static final int GRID_SIZE = 25;
@@ -31,12 +33,6 @@ public class CardCanvas extends JPanel {
 
     private final int canvasWidth;
     private final int canvasHeight;
-
-    private BufferedImage backgroundImage;
-    private int imgX = 0;
-    private int imgY = 0;
-    private int imgW;
-    private int imgH;
 
     private final List<CardElement> elements = new ArrayList<>();
     private CardElement selectedElement = null;
@@ -48,8 +44,7 @@ public class CardCanvas extends JPanel {
     /**
      * Builds a canvas for one card at the given page size.
      *
-     * The background image starts covering the whole card. A new
-     * CardRenderer and a new CanvasMouseController are created and
+     * A new CardRenderer and a new CanvasMouseController are created and
      * wired up to this canvas.
      *
      * @param model        the project Model being edited
@@ -61,8 +56,6 @@ public class CardCanvas extends JPanel {
     public CardCanvas(Model model, UUID cardID, int canvasWidth, int canvasHeight, ActionsManager actions) {
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
-        this.imgW = canvasWidth;
-        this.imgH = canvasHeight;
         setBackground(Color.WHITE);
 
         this.renderer = new CardRenderer(model);
@@ -161,79 +154,6 @@ public class CardCanvas extends JPanel {
         } else {
             repaint();
         }
-    }
-
-
-    /**
-     * Returns the background image drawn under the card elements, or null
-     * if no background is set.
-     *
-     * @return the background BufferedImage, or null
-     */
-    public BufferedImage getBackgroundImage() {
-        return backgroundImage;
-    }
-
-    /**
-     * Returns the x position of the background image in card coordinates.
-     *
-     * @return the current imgX
-     */
-    public int getImgX() { return imgX; }
-
-    /**
-     * Returns the y position of the background image in card coordinates.
-     *
-     * @return the current imgY
-     */
-    public int getImgY() { return imgY; }
-
-    /**
-     * Returns the width of the background image in card coordinates.
-     *
-     * @return the current imgW
-     */
-    public int getImgW() { return imgW; }
-
-    /**
-     * Returns the height of the background image in card coordinates.
-     *
-     * @return the current imgH
-     */
-    public int getImgH() { return imgH; }
-
-    /**
-     * Sets the background image geometry and repaints the canvas.
-     *
-     * Used during drag and resize, and by BackgroundImageRecord on
-     * undo and redo.
-     *
-     * @param x left edge in card coordinates
-     * @param y top edge in card coordinates
-     * @param w width in card coordinates
-     * @param h height in card coordinates
-     */
-    public void setImageBounds(int x, int y, int w, int h) {
-        this.imgX = x;
-        this.imgY = y;
-        this.imgW = w;
-        this.imgH = h;
-        repaint();
-    }
-
-    /**
-     * Sets a new background image and resets its geometry to the image's
-     * own size at the origin.
-     *
-     * @param img the new background image, must not be null
-     */
-    public void setBackgroundImage(BufferedImage img) {
-        this.backgroundImage = img;
-        this.imgX = 0;
-        this.imgY = 0;
-        this.imgW = img.getWidth();
-        this.imgH = img.getHeight();
-        repaint();
     }
 
 

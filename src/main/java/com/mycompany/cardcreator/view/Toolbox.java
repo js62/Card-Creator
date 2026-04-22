@@ -17,10 +17,9 @@ import javax.swing.event.DocumentListener;
 import com.mycompany.cardcreator.model.CardElement;
 import com.mycompany.cardcreator.model.CardElementType;
 import com.mycompany.cardcreator.model.Model;
-import com.mycompany.cardcreator.util.ActionsManager;
-import com.mycompany.cardcreator.util.AddedElementRecord;
-import com.mycompany.cardcreator.util.ElementSnapshot;
-import com.mycompany.cardcreator.util.SoundPlayer;
+import com.mycompany.cardcreator.model.ActionsManager;
+import com.mycompany.cardcreator.model.AddedElementRecord;
+import com.mycompany.cardcreator.model.ElementSnapshot;
 
 /**
  * Left side panel of the editor that shows the tools for the selected

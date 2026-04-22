@@ -10,10 +10,9 @@ import javax.swing.SwingUtilities;
 import com.mycompany.cardcreator.model.CardElement;
 import com.mycompany.cardcreator.model.CardElementType;
 import com.mycompany.cardcreator.model.Model;
-import com.mycompany.cardcreator.util.ActionsManager;
-import com.mycompany.cardcreator.util.BackgroundImageRecord;
-import com.mycompany.cardcreator.util.DeletedElementRecord;
-import com.mycompany.cardcreator.util.ElementSnapshot;
+import com.mycompany.cardcreator.model.ActionsManager;
+import com.mycompany.cardcreator.model.DeletedElementRecord;
+import com.mycompany.cardcreator.model.ElementSnapshot;
 import com.mycompany.cardcreator.view.CardCanvas;
 
 /**
@@ -40,19 +39,6 @@ public class CanvasMouseController extends MouseAdapter {
     private ElementSnapshot gestureBefore = null;
     private CardElement gestureElement = null;
 
-    // background image drag state
-    private boolean dragging = false;
-    private int dragOffsetX, dragOffsetY;
-
-    // background image resize state
-    private boolean resizing = false;
-    private int resizeCorner = -1;
-    private float aspectRatio =1f;
-
-    // snapshot of the background image geometry when a gesture started
-    private int bgBeforeX, bgBeforeY, bgBeforeW, bgBeforeH;
-    private boolean bgGestureActive = false;
-
     /**
      * Builds a mouse controller that listens on one canvas.
      *
@@ -72,9 +58,8 @@ public class CanvasMouseController extends MouseAdapter {
      * Handles a mouse button press on the canvas.
      *
      * Right clicks open the context menu. Left clicks either grab a
-     * resize handle on the selected element, start dragging whichever
-     * element is under the cursor, or start dragging or resizing the
-     * background image when nothing else is hit.
+     * resize handle on the selected element or start dragging whichever
+     * element is under the cursor.
      *
      * @param e the incoming MouseEvent
      */
@@ -120,33 +105,13 @@ public class CanvasMouseController extends MouseAdapter {
 
         // nothing hit, deselect
         canvas.setSelectedElement(null);
-
-        // background image handling
-        if (canvas.getBackgroundImage() != null) {
-            int corner = getBackgroundCornerAt(mx, my);
-            if (corner >= 0) {
-                resizing = true;
-                resizeCorner = corner;
-                aspectRatio = (float) canvas.getImgW() / canvas.getImgH();
-                captureBackgroundGestureStart();
-                return;
-            }
-            if (mx >= canvas.getImgX() && mx <= canvas.getImgX() + canvas.getImgW()
-                    && my >= canvas.getImgY() && my <= canvas.getImgY() + canvas.getImgH()) {
-                dragging = true;
-                dragOffsetX = mx - canvas.getImgX();
-                dragOffsetY = my - canvas.getImgY();
-                captureBackgroundGestureStart();
-            }
-        }
     }
 
     /**
      * Handles a mouse button release on the canvas.
      *
-     * Snaps the element or background image to the grid, pushes the
-     * gesture onto the undo stack as a single step, and clears the
-     * gesture state.
+     * Snaps the element to the grid, pushes the gesture onto the undo
+     * stack as a single step, and clears the gesture state.
      *
      * @param e the incoming MouseEvent
      */
@@ -182,37 +147,13 @@ public class CanvasMouseController extends MouseAdapter {
         }
         gestureElement = null;
         gestureBefore = null;
-
-        // snap background image to grid
-        boolean endedBgGesture = false;
-        if (dragging) {
-            canvas.setImageBounds(canvas.snapToGrid(canvas.getImgX()),
-                canvas.snapToGrid(canvas.getImgY()),
-                canvas.getImgW(), canvas.getImgH());
-            dragging = false;
-            endedBgGesture = true;
-        }
-        if (resizing) {
-            canvas.setImageBounds(canvas.snapToGrid(canvas.getImgX()),
-                canvas.snapToGrid(canvas.getImgY()),
-                Math.max(CardCanvas.GRID_SIZE, canvas.snapToGrid(canvas.getImgW())),
-                Math.max(CardCanvas.GRID_SIZE, canvas.snapToGrid(canvas.getImgH())));
-            resizing = false;
-            resizeCorner = -1;
-            endedBgGesture = true;
-        }
-        if (endedBgGesture && bgGestureActive) {
-            commitBackgroundGesture();
-        }
-        bgGestureActive = false;
     }
 
     /**
      * Handles a mouse drag on the canvas.
      *
-     * Moves the element being dragged, resizes the element whose handle
-     * was grabbed, or moves or resizes the background image, depending
-     * on what mousePressed started.
+     * Moves the element being dragged or resizes the element whose
+     * handle was grabbed, depending on what mousePressed started.
      *
      * @param e the incoming MouseEvent
      */
@@ -229,11 +170,6 @@ public class CanvasMouseController extends MouseAdapter {
         } else if (resizingElement && sel != null) {
             resizeElement(sel, elementResizeCorner, mx, my);
             canvas.repaint();
-        } else if (resizing && canvas.getBackgroundImage() != null) {
-            resizeBackgroundImage(resizeCorner, mx, my);
-        } else if (dragging) {
-            canvas.setImageBounds(mx - dragOffsetX, my - dragOffsetY,
-                canvas.getImgW(), canvas.getImgH());
         }
     }
 
@@ -272,22 +208,7 @@ public class CanvasMouseController extends MouseAdapter {
             }
         }
 
-        // background image handles / body
-        if (canvas.getBackgroundImage() != null) {
-            int corner = getBackgroundCornerAt(mx, my);
-            if (corner == 0 || corner == 3) {
-                canvas.setCursor(Cursor.getPredefinedCursor(Cursor.NW_RESIZE_CURSOR));
-            } else if (corner == 1 || corner == 2) {
-                canvas.setCursor(Cursor.getPredefinedCursor(Cursor.NE_RESIZE_CURSOR));
-            } else if (mx >= canvas.getImgX() && mx <= canvas.getImgX() + canvas.getImgW()
-                    && my >= canvas.getImgY() && my <= canvas.getImgY() + canvas.getImgH()) {
-                canvas.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-            } else {
-                canvas.setCursor(Cursor.getDefaultCursor());
-            }
-        } else {
-            canvas.setCursor(Cursor.getDefaultCursor());
-        }
+        canvas.setCursor(Cursor.getDefaultCursor());
     }
 
     // right click menu: delete + (for shapes) fill/unfill
@@ -372,41 +293,6 @@ public class CanvasMouseController extends MouseAdapter {
         }
     }
 
-    // corner resize for the background image, maintaining aspect ratio
-    private void resizeBackgroundImage(int corner, int mx, int my) {
-        int ix = canvas.getImgX();
-        int iy = canvas.getImgY();
-        int iw = canvas.getImgW();
-        int ih = canvas.getImgH();
-        int g = CardCanvas.GRID_SIZE;
-        switch (corner) {
-            case 0: {
-                int nw = (ix + iw) - mx;
-                int nh = Math.round(nw / aspectRatio);
-                if (nw > g) canvas.setImageBounds((ix + iw) - nw, (iy + ih) - nh, nw, nh);
-                break;
-            }
-            case 1: {
-                int nw = mx - ix;
-                int nh = Math.round(nw / aspectRatio);
-                if (nw > g) canvas.setImageBounds(ix, (iy + ih) - nh, nw, nh);
-                break;
-            }
-            case 2: {
-                int nw = (ix + iw) - mx;
-                int nh = Math.round(nw / aspectRatio);
-                if (nw > g) canvas.setImageBounds((ix + iw) - nw, iy, nw, nh);
-                break;
-            }
-            case 3: {
-                int nw = mx - ix;
-                int nh = Math.round(nw / aspectRatio);
-                if (nw > g) canvas.setImageBounds(ix, iy, nw, nh);
-                break;
-            }
-        }
-    }
-
     // is (mx,my) near a corner handle of the selected element?
     private int getElementCornerAt(CardElement el, int mx, int my) {
         int half = CardCanvas.HANDLE_SIZE / 2;
@@ -415,34 +301,5 @@ public class CanvasMouseController extends MouseAdapter {
         if (Math.abs(mx - el.x) <= half && Math.abs(my - (el.y + el.height)) <= half) return 2;
         if (Math.abs(mx - (el.x + el.width)) <= half && Math.abs(my - (el.y + el.height)) <= half) return 3;
         return -1;
-    }
-
-    // is (mx,my) near a corner handle of the background image?
-    private int getBackgroundCornerAt(int mx, int my) {
-        int half = CardCanvas.HANDLE_SIZE / 2;
-        int x = canvas.getImgX(), y = canvas.getImgY();
-        int w = canvas.getImgW(), h = canvas.getImgH();
-        if (Math.abs(mx - x) <= half && Math.abs(my - y) <= half) return 0;
-        if (Math.abs(mx - (x + w)) <= half && Math.abs(my - y) <= half) return 1;
-        if (Math.abs(mx - x) <= half && Math.abs(my - (y + h)) <= half) return 2;
-        if (Math.abs(mx - (x + w)) <= half && Math.abs(my - (y + h)) <= half) return 3;
-        return -1;
-    }
-
-    private void captureBackgroundGestureStart() {
-        bgBeforeX = canvas.getImgX();
-        bgBeforeY = canvas.getImgY();
-        bgBeforeW = canvas.getImgW();
-        bgBeforeH = canvas.getImgH();
-        bgGestureActive = true;
-    }
-
-    private void commitBackgroundGesture() {
-        BackgroundImageRecord rec = new BackgroundImageRecord(canvas,
-            bgBeforeX, bgBeforeY, bgBeforeW, bgBeforeH,
-            canvas.getImgX(), canvas.getImgY(), canvas.getImgW(), canvas.getImgH());
-        if (!rec.isNoOp()) {
-            actions.record(rec);
-        }
     }
 }

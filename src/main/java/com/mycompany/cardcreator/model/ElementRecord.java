@@ -1,4 +1,4 @@
-package com.mycompany.cardcreator.util;
+package com.mycompany.cardcreator.model;
 
 /**
  * One step in the undo history.

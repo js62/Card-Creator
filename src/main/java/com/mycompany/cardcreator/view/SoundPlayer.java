@@ -1,4 +1,4 @@
-package com.mycompany.cardcreator.util;
+package com.mycompany.cardcreator.view;
 
 import javax.sound.sampled.*;
 import java.io.InputStream;
@@ -16,6 +16,9 @@ public class SoundPlayer {
     /** Classpath location of the standard button click sound. */
     public static final String CLICK = "Sounds/button-10.wav";
 
+    /** Classpath location of the cue played when the editor opens a card. */
+    public static final String EDITOR_LOAD = "Sounds/EditorLoadSound.wav";
+
     /**
      * Plays the standard button click sound.
      *
@@ -24,6 +27,16 @@ public class SoundPlayer {
      */
     public static void playClick() {
         playSound(CLICK);
+    }
+
+    /**
+     * Plays the editor-load cue.
+     *
+     * Shorthand for playSound(EDITOR_LOAD), called once when a
+     * CardEditor opens a card.
+     */
+    public static void playEditorLoad() {
+        playSound(EDITOR_LOAD);
     }
 
     /**
